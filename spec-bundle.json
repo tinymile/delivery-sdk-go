@@ -153,7 +153,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RequestQuoteClientError"
+                  "$ref": "#/components/schemas/RequestQuoteClientErrorResponse"
                 }
               }
             }
@@ -190,14 +190,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/DeliveryOrderRejection"
-                    },
-                    {
-                      "$ref": "#/components/schemas/InvalidClientActionError"
-                    }
-                  ]
+                  "$ref": "#/components/schemas/CreateOrderClientErrorResponse"
                 }
               }
             }
@@ -474,7 +467,7 @@
           "stage",
           "deliveryOrderUuid",
           "shipper",
-          "consignee",
+          "receiver",
           "pickUpService",
           "dropOffService",
           "deliveryCharges"
@@ -795,7 +788,7 @@
           }
         }
       },
-      "RequestQuoteClientError": {
+      "RequestQuoteClientErrorResponse": {
         "oneOf": [
           {
             "$ref": "#/components/schemas/DeliveryOrderRejection"
@@ -834,7 +827,7 @@
         "required": [
           "externalID",
           "shipper",
-          "consignee",
+          "receiver",
           "pickUpAddress",
           "dropOffAddress"
         ],
@@ -845,7 +838,7 @@
           "shipper": {
             "$ref": "#/components/schemas/DeliveryOrderParty"
           },
-          "consignee": {
+          "receiver": {
             "$ref": "#/components/schemas/DeliveryOrderParty"
           },
           "pickUpAddress": {
@@ -887,7 +880,7 @@
           "status",
           "receivedAt",
           "shipper",
-          "consignee",
+          "receiver",
           "pickUp",
           "dropOff",
           "deliveryCharges",
@@ -917,7 +910,7 @@
           "shipper": {
             "$ref": "#/components/schemas/DeliveryOrderParty"
           },
-          "consignee": {
+          "receiver": {
             "$ref": "#/components/schemas/DeliveryOrderParty"
           },
           "pickUp": {
@@ -933,6 +926,16 @@
             "type": "boolean"
           }
         }
+      },
+      "CreateOrderClientErrorResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DeliveryOrderRejection"
+          },
+          {
+            "$ref": "#/components/schemas/InvalidClientActionError"
+          }
+        ]
       }
     }
   }

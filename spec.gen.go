@@ -158,6 +158,11 @@ type CourierEvent struct {
 // CourierEventKind defines model for CourierEvent.Kind.
 type CourierEventKind string
 
+// CreateOrderClientErrorResponse defines model for CreateOrderClientErrorResponse.
+type CreateOrderClientErrorResponse struct {
+	union json.RawMessage
+}
+
 // DeliveryCharges defines model for DeliveryCharges.
 type DeliveryCharges struct {
 	TotalInCents int32 `json:"totalInCents"`
@@ -193,13 +198,13 @@ type DeliveryJobEventKind string
 
 // DeliveryOrder defines model for DeliveryOrder.
 type DeliveryOrder struct {
-	Consignee       DeliveryOrderParty  `json:"consignee"`
 	DeliveryCharges DeliveryCharges     `json:"deliveryCharges"`
 	DropOff         DeliveryService     `json:"dropOff"`
 	ExternalID      string              `json:"externalID"`
 	IsMock          bool                `json:"isMock"`
 	PickUp          DeliveryService     `json:"pickUp"`
 	ReceivedAt      time.Time           `json:"receivedAt"`
+	Receiver        DeliveryOrderParty  `json:"receiver"`
 	Shipper         DeliveryOrderParty  `json:"shipper"`
 	Status          DeliveryOrderStatus `json:"status"`
 	Uuid            openapi_types.UUID  `json:"uuid"`
@@ -210,7 +215,6 @@ type DeliveryOrderStatus string
 
 // DeliveryOrderCreationRequest defines model for DeliveryOrderCreationRequest.
 type DeliveryOrderCreationRequest struct {
-	Consignee          DeliveryOrderParty `json:"consignee"`
 	DropOffAddress     CompleteAddress    `json:"dropOffAddress"`
 	DropOffDeadlineAt  *time.Time         `json:"dropOffDeadlineAt,omitempty"`
 	DropOffNotes       *string            `json:"dropOffNotes,omitempty"`
@@ -221,6 +225,7 @@ type DeliveryOrderCreationRequest struct {
 	PickUpDeadlineAt   *time.Time         `json:"pickUpDeadlineAt,omitempty"`
 	PickUpNotes        *string            `json:"pickUpNotes,omitempty"`
 	PickUpNotifyParty  *NotifyParty       `json:"pickUpNotifyParty,omitempty"`
+	Receiver           DeliveryOrderParty `json:"receiver"`
 	Shipper            DeliveryOrderParty `json:"shipper"`
 }
 
@@ -303,8 +308,8 @@ type NotifyParty struct {
 	PhoneNumber *string `json:"phoneNumber,omitempty"`
 }
 
-// RequestQuoteClientError defines model for RequestQuoteClientError.
-type RequestQuoteClientError struct {
+// RequestQuoteClientErrorResponse defines model for RequestQuoteClientErrorResponse.
+type RequestQuoteClientErrorResponse struct {
 	union json.RawMessage
 }
 
@@ -350,36 +355,70 @@ type RequestQuoteJSONRequestBody = RequestQuoteJSONBody
 // SetWebhooksJSONRequestBody defines body for SetWebhooks for application/json ContentType.
 type SetWebhooksJSONRequestBody = SetWebhooksJSONBody
 
-func (t RequestQuoteClientError) AsDeliveryOrderRejection() (DeliveryOrderRejection, error) {
+func (t CreateOrderClientErrorResponse) AsDeliveryOrderRejection() (DeliveryOrderRejection, error) {
 	var body DeliveryOrderRejection
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-func (t *RequestQuoteClientError) FromDeliveryOrderRejection(v DeliveryOrderRejection) error {
+func (t *CreateOrderClientErrorResponse) FromDeliveryOrderRejection(v DeliveryOrderRejection) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-func (t RequestQuoteClientError) AsInvalidClientActionError() (InvalidClientActionError, error) {
+func (t CreateOrderClientErrorResponse) AsInvalidClientActionError() (InvalidClientActionError, error) {
 	var body InvalidClientActionError
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-func (t *RequestQuoteClientError) FromInvalidClientActionError(v InvalidClientActionError) error {
+func (t *CreateOrderClientErrorResponse) FromInvalidClientActionError(v InvalidClientActionError) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-func (t RequestQuoteClientError) MarshalJSON() ([]byte, error) {
+func (t CreateOrderClientErrorResponse) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *RequestQuoteClientError) UnmarshalJSON(b []byte) error {
+func (t *CreateOrderClientErrorResponse) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+func (t RequestQuoteClientErrorResponse) AsDeliveryOrderRejection() (DeliveryOrderRejection, error) {
+	var body DeliveryOrderRejection
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+func (t *RequestQuoteClientErrorResponse) FromDeliveryOrderRejection(v DeliveryOrderRejection) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+func (t RequestQuoteClientErrorResponse) AsInvalidClientActionError() (InvalidClientActionError, error) {
+	var body InvalidClientActionError
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+func (t *RequestQuoteClientErrorResponse) FromInvalidClientActionError(v InvalidClientActionError) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+func (t RequestQuoteClientErrorResponse) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *RequestQuoteClientErrorResponse) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -936,9 +975,7 @@ type CreateOrderResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeliveryOrder
-	JSON400      *struct {
-		union json.RawMessage
-	}
+	JSON400      *CreateOrderClientErrorResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -961,7 +998,7 @@ type RequestQuoteResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *DeliveryOrderQuote
-	JSON400      *RequestQuoteClientError
+	JSON400      *RequestQuoteClientErrorResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -1176,9 +1213,7 @@ func ParseCreateOrderResponse(rsp *http.Response) (*CreateOrderResponse, error) 
 		response.JSON200 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest struct {
-			union json.RawMessage
-		}
+		var dest CreateOrderClientErrorResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1211,7 +1246,7 @@ func ParseRequestQuoteResponse(rsp *http.Response) (*RequestQuoteResponse, error
 		response.JSON200 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest RequestQuoteClientError
+		var dest RequestQuoteClientErrorResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
