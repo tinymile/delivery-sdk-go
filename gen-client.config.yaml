@@ -1,5 +1,4 @@
 package: delivery_sdk
 generate:
-  models: true
   client: true
-output: spec.gen.go
+output: client.gen.go

@@ -3,7 +3,8 @@ OPENAPI_SPEC_BUNDLE := spec-bundle.json
 
 ALL_TARGETS := \
 	$(OPENAPI_SPEC_BUNDLE) \
-	spec.gen.go
+	types.gen.go \
+	client.gen.go
 
 GO_BUILD_DEPS := \
 	github.com/deepmap/oapi-codegen/cmd/oapi-codegen@7da811e1cf30c76606750b20b7998543d36a25cb
@@ -16,8 +17,8 @@ all: $(ALL_TARGETS)
 clean:
 	rm -rf $(ALL_TARGETS)
 
-spec.gen.go: $(OPENAPI_SPEC_BUNDLE) oapi-codegen-config.yaml
-	oapi-codegen -config oapi-codegen-config.yaml $<
+%.gen.go:  gen-%.config.yaml $(OPENAPI_SPEC_BUNDLE)
+	oapi-codegen -config $< $(OPENAPI_SPEC_BUNDLE)
 
 .PHONY: install-deps
 install-deps: $(GO_BUILD_DEPS)
