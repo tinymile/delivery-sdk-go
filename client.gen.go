@@ -111,6 +111,9 @@ type ClientInterface interface {
 
 	CreateOrder(ctx context.Context, body CreateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetJobsForOrder request
+	GetJobsForOrder(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// RequestQuote request with any body
 	RequestQuoteWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -208,6 +211,18 @@ func (c *Client) CreateOrderWithBody(ctx context.Context, contentType string, bo
 
 func (c *Client) CreateOrder(ctx context.Context, body CreateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateOrderRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetJobsForOrder(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetJobsForOrderRequest(c.Server, orderUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -447,6 +462,40 @@ func NewCreateOrderRequestWithBody(server string, contentType string, body io.Re
 	return req, nil
 }
 
+// NewGetJobsForOrderRequest generates requests for GetJobsForOrder
+func NewGetJobsForOrderRequest(server string, orderUuid openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "order_uuid", runtime.ParamLocationPath, orderUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/orders/%s/delivery-jobs", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewRequestQuoteRequest calls the generic RequestQuote builder with application/json body
 func NewRequestQuoteRequest(server string, body RequestQuoteJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -590,6 +639,9 @@ type ClientWithResponsesInterface interface {
 
 	CreateOrderWithResponse(ctx context.Context, body CreateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateOrderResponse, error)
 
+	// GetJobsForOrder request
+	GetJobsForOrderWithResponse(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetJobsForOrderResponse, error)
+
 	// RequestQuote request with any body
 	RequestQuoteWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*RequestQuoteResponse, error)
 
@@ -686,6 +738,28 @@ func (r CreateOrderResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CreateOrderResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetJobsForOrderResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]DeliveryJob
+}
+
+// Status returns HTTPResponse.Status
+func (r GetJobsForOrderResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetJobsForOrderResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -804,6 +878,15 @@ func (c *ClientWithResponses) CreateOrderWithResponse(ctx context.Context, body 
 		return nil, err
 	}
 	return ParseCreateOrderResponse(rsp)
+}
+
+// GetJobsForOrderWithResponse request returning *GetJobsForOrderResponse
+func (c *ClientWithResponses) GetJobsForOrderWithResponse(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetJobsForOrderResponse, error) {
+	rsp, err := c.GetJobsForOrder(ctx, orderUuid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetJobsForOrderResponse(rsp)
 }
 
 // RequestQuoteWithBodyWithResponse request with arbitrary body returning *RequestQuoteResponse
@@ -959,6 +1042,32 @@ func ParseCreateOrderResponse(rsp *http.Response) (*CreateOrderResponse, error) 
 			return nil, err
 		}
 		response.JSON400 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetJobsForOrderResponse parses an HTTP response from a GetJobsForOrderWithResponse call
+func ParseGetJobsForOrderResponse(rsp *http.Response) (*GetJobsForOrderResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetJobsForOrderResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []DeliveryJob
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	}
 

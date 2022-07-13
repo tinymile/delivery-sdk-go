@@ -201,6 +201,38 @@
         }
       }
     },
+    "/api/v1/orders/{order_uuid}/delivery-jobs": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "order_uuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "get-jobs-for-order",
+        "summary": "Fetch delivery jobs of order",
+        "responses": {
+          "200": {
+            "description": "Delivery jobs associated with order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeliveryJob"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/delivery-jobs/{delivery_job_uuid}/robot-commands/open-lid": {
       "parameters": [
         {
