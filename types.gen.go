@@ -322,6 +322,9 @@ type PostOrderDroppedOffJSONBody interface{}
 // PostOrderPickedUpJSONBody defines parameters for PostOrderPickedUp.
 type PostOrderPickedUpJSONBody interface{}
 
+// CreateOpenRobotLidCommandJSONBody defines parameters for CreateOpenRobotLidCommand.
+type CreateOpenRobotLidCommandJSONBody interface{}
+
 // CreateOrderJSONBody defines parameters for CreateOrder.
 type CreateOrderJSONBody = DeliveryOrderCreationRequest
 
@@ -336,6 +339,9 @@ type PostOrderDroppedOffJSONRequestBody PostOrderDroppedOffJSONBody
 
 // PostOrderPickedUpJSONRequestBody defines body for PostOrderPickedUp for application/json ContentType.
 type PostOrderPickedUpJSONRequestBody PostOrderPickedUpJSONBody
+
+// CreateOpenRobotLidCommandJSONRequestBody defines body for CreateOpenRobotLidCommand for application/json ContentType.
+type CreateOpenRobotLidCommandJSONRequestBody CreateOpenRobotLidCommandJSONBody
 
 // CreateOrderJSONRequestBody defines body for CreateOrder for application/json ContentType.
 type CreateOrderJSONRequestBody = CreateOrderJSONBody

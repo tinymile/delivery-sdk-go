@@ -51,14 +51,19 @@
               "application/json": {
                 "schema": {
                   "SetWebhookError": {
-                    "required": ["message", "reason"],
+                    "required": [
+                      "message",
+                      "reason"
+                    ],
                     "properties": {
                       "message": {
                         "type": "string"
                       },
                       "reason": {
                         "type": "string",
-                        "enum": ["invalid-url"]
+                        "enum": [
+                          "invalid-url"
+                        ]
                       }
                     }
                   }
@@ -196,6 +201,46 @@
         }
       }
     },
+    "/api/v1/delivery-jobs/{delivery_job_uuid}/robot-commands/open-lid": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_job_uuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "create-open-robot-lid-command",
+        "summary": "Create command to open robot's lid",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Command was accepted.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Command was rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidClientActionError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/delivery-jobs/{delivery_job_uuid}/events/order-picked-up": {
       "parameters": [
         {
@@ -296,7 +341,10 @@
     "schemas": {
       "Webhook": {
         "type": "object",
-        "required": ["url", "api_key"],
+        "required": [
+          "url",
+          "api_key"
+        ],
         "properties": {
           "url": {
             "type": "string"
@@ -307,7 +355,10 @@
         }
       },
       "Webhooks": {
-        "required": ["deliveryJobEvents", "courierEvents"],
+        "required": [
+          "deliveryJobEvents",
+          "courierEvents"
+        ],
         "properties": {
           "deliveryJobEvents": {
             "$ref": "#/components/schemas/Webhook"
@@ -319,7 +370,10 @@
       },
       "GeocodedAddress": {
         "type": "object",
-        "required": ["lat", "lng"],
+        "required": [
+          "lat",
+          "lng"
+        ],
         "properties": {
           "lat": {
             "type": "number",
@@ -369,7 +423,10 @@
       },
       "CompleteAddress": {
         "type": "object",
-        "required": ["geocodedAddress", "addressDescription"],
+        "required": [
+          "geocodedAddress",
+          "addressDescription"
+        ],
         "properties": {
           "geocodedAddress": {
             "$ref": "#/components/schemas/GeocodedAddress"
@@ -436,7 +493,9 @@
       },
       "DeliveryCharges": {
         "type": "object",
-        "required": ["totalInCents"],
+        "required": [
+          "totalInCents"
+        ],
         "properties": {
           "totalInCents": {
             "type": "integer",
@@ -500,7 +559,12 @@
       },
       "DeliveryJobEvent": {
         "type": "object",
-        "required": ["uuid", "kind", "producedAt", "deliveryJob"],
+        "required": [
+          "uuid",
+          "kind",
+          "producedAt",
+          "deliveryJob"
+        ],
         "properties": {
           "uuid": {
             "type": "string",
@@ -540,7 +604,10 @@
       },
       "GeocodeLogEntry": {
         "type": "object",
-        "required": ["geocodedAddress", "recordedAt"],
+        "required": [
+          "geocodedAddress",
+          "recordedAt"
+        ],
         "properties": {
           "geocodedAddress": {
             "$ref": "#/components/schemas/GeocodedAddress"
@@ -568,7 +635,10 @@
           },
           "type": {
             "type": "string",
-            "enum": ["robot", "conventional"]
+            "enum": [
+              "robot",
+              "conventional"
+            ]
           },
           "name": {
             "type": "string"
@@ -601,7 +671,12 @@
       },
       "CourierEvent": {
         "type": "object",
-        "required": ["uuid", "kind", "producedAt", "courier"],
+        "required": [
+          "uuid",
+          "kind",
+          "producedAt",
+          "courier"
+        ],
         "properties": {
           "uuid": {
             "type": "string",
@@ -642,7 +717,10 @@
       },
       "DeliveryOrderQuoteRequest": {
         "type": "object",
-        "required": ["pickUpAddress", "dropOffAddress"],
+        "required": [
+          "pickUpAddress",
+          "dropOffAddress"
+        ],
         "properties": {
           "pickUpAddress": {
             "$ref": "#/components/schemas/GeocodedAddress"
@@ -715,7 +793,10 @@
       },
       "DeliveryOrderRejection": {
         "type": "object",
-        "required": ["reason", "message"],
+        "required": [
+          "reason",
+          "message"
+        ],
         "properties": {
           "reason": {
             "type": "string",
@@ -733,11 +814,17 @@
       },
       "InvalidClientActionError": {
         "type": "object",
-        "required": ["reason", "message"],
+        "required": [
+          "reason",
+          "message"
+        ],
         "properties": {
           "reason": {
             "type": "string",
-            "enum": ["deactivated-client", "invalid-argument"]
+            "enum": [
+              "deactivated-client",
+              "invalid-argument"
+            ]
           },
           "message": {
             "type": "string"
@@ -756,7 +843,10 @@
       },
       "DeliveryOrderParty": {
         "type": "object",
-        "required": ["name", "isBusiness"],
+        "required": [
+          "name",
+          "isBusiness"
+        ],
         "properties": {
           "name": {
             "type": "string"
