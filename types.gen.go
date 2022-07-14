@@ -164,7 +164,7 @@ type DeliveryJob struct {
 	CompletedAt        *time.Time          `json:"completedAt,omitempty"`
 	CurrentCourierUUID *openapi_types.UUID `json:"currentCourierUUID,omitempty"`
 	DeliveryCharges    DeliveryCharges     `json:"deliveryCharges"`
-	DeliveryOrderUuid  openapi_types.UUID  `json:"deliveryOrderUuid"`
+	DeliveryOrderUUID  openapi_types.UUID  `json:"deliveryOrderUUID"`
 	DropOffService     DeliveryService     `json:"dropOffService"`
 	NextCourierUUID    *openapi_types.UUID `json:"nextCourierUUID,omitempty"`
 	PickUpService      DeliveryService     `json:"pickUpService"`
@@ -316,14 +316,14 @@ type Webhooks struct {
 	DeliveryJobEvents Webhook `json:"deliveryJobEvents"`
 }
 
+// CreateOpenRobotLidCommandJSONBody defines parameters for CreateOpenRobotLidCommand.
+type CreateOpenRobotLidCommandJSONBody interface{}
+
 // PostOrderDroppedOffJSONBody defines parameters for PostOrderDroppedOff.
 type PostOrderDroppedOffJSONBody interface{}
 
 // PostOrderPickedUpJSONBody defines parameters for PostOrderPickedUp.
 type PostOrderPickedUpJSONBody interface{}
-
-// CreateOpenRobotLidCommandJSONBody defines parameters for CreateOpenRobotLidCommand.
-type CreateOpenRobotLidCommandJSONBody interface{}
 
 // CreateOrderJSONBody defines parameters for CreateOrder.
 type CreateOrderJSONBody = DeliveryOrderCreationRequest
@@ -334,14 +334,14 @@ type RequestQuoteJSONBody = DeliveryOrderQuoteRequest
 // SetWebhooksJSONBody defines parameters for SetWebhooks.
 type SetWebhooksJSONBody = Webhooks
 
+// CreateOpenRobotLidCommandJSONRequestBody defines body for CreateOpenRobotLidCommand for application/json ContentType.
+type CreateOpenRobotLidCommandJSONRequestBody CreateOpenRobotLidCommandJSONBody
+
 // PostOrderDroppedOffJSONRequestBody defines body for PostOrderDroppedOff for application/json ContentType.
 type PostOrderDroppedOffJSONRequestBody PostOrderDroppedOffJSONBody
 
 // PostOrderPickedUpJSONRequestBody defines body for PostOrderPickedUp for application/json ContentType.
 type PostOrderPickedUpJSONRequestBody PostOrderPickedUpJSONBody
-
-// CreateOpenRobotLidCommandJSONRequestBody defines body for CreateOpenRobotLidCommand for application/json ContentType.
-type CreateOpenRobotLidCommandJSONRequestBody CreateOpenRobotLidCommandJSONBody
 
 // CreateOrderJSONRequestBody defines body for CreateOrder for application/json ContentType.
 type CreateOrderJSONRequestBody = CreateOrderJSONBody

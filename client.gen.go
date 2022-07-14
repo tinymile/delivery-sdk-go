@@ -91,6 +91,14 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// GetDeliveryJobCurrentCourier request
+	GetDeliveryJobCurrentCourier(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CreateOpenRobotLidCommand request with any body
+	CreateOpenRobotLidCommandWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateOpenRobotLidCommand(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// PostOrderDroppedOff request with any body
 	PostOrderDroppedOffWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -100,11 +108,6 @@ type ClientInterface interface {
 	PostOrderPickedUpWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	PostOrderPickedUp(ctx context.Context, deliveryJobUuid openapi_types.UUID, body PostOrderPickedUpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// CreateOpenRobotLidCommand request with any body
-	CreateOpenRobotLidCommandWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	CreateOpenRobotLidCommand(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateOrder request with any body
 	CreateOrderWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -123,6 +126,42 @@ type ClientInterface interface {
 	SetWebhooksWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	SetWebhooks(ctx context.Context, body SetWebhooksJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) GetDeliveryJobCurrentCourier(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDeliveryJobCurrentCourierRequest(c.Server, deliveryJobUuid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateOpenRobotLidCommandWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateOpenRobotLidCommandRequestWithBody(c.Server, deliveryJobUuid, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateOpenRobotLidCommand(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateOpenRobotLidCommandRequest(c.Server, deliveryJobUuid, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) PostOrderDroppedOffWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -163,30 +202,6 @@ func (c *Client) PostOrderPickedUpWithBody(ctx context.Context, deliveryJobUuid 
 
 func (c *Client) PostOrderPickedUp(ctx context.Context, deliveryJobUuid openapi_types.UUID, body PostOrderPickedUpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPostOrderPickedUpRequest(c.Server, deliveryJobUuid, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CreateOpenRobotLidCommandWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOpenRobotLidCommandRequestWithBody(c.Server, deliveryJobUuid, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CreateOpenRobotLidCommand(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOpenRobotLidCommandRequest(c.Server, deliveryJobUuid, body)
 	if err != nil {
 		return nil, err
 	}
@@ -281,6 +296,87 @@ func (c *Client) SetWebhooks(ctx context.Context, body SetWebhooksJSONRequestBod
 	return c.Client.Do(req)
 }
 
+// NewGetDeliveryJobCurrentCourierRequest generates requests for GetDeliveryJobCurrentCourier
+func NewGetDeliveryJobCurrentCourierRequest(server string, deliveryJobUuid openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "delivery_job_uuid", runtime.ParamLocationPath, deliveryJobUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/delivery-jobs/%s/couriers/current", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateOpenRobotLidCommandRequest calls the generic CreateOpenRobotLidCommand builder with application/json body
+func NewCreateOpenRobotLidCommandRequest(server string, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateOpenRobotLidCommandRequestWithBody(server, deliveryJobUuid, "application/json", bodyReader)
+}
+
+// NewCreateOpenRobotLidCommandRequestWithBody generates requests for CreateOpenRobotLidCommand with any type of body
+func NewCreateOpenRobotLidCommandRequestWithBody(server string, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "delivery_job_uuid", runtime.ParamLocationPath, deliveryJobUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/delivery-jobs/%s/couriers/current/open-lid", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewPostOrderDroppedOffRequest calls the generic PostOrderDroppedOff builder with application/json body
 func NewPostOrderDroppedOffRequest(server string, deliveryJobUuid openapi_types.UUID, body PostOrderDroppedOffJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -356,53 +452,6 @@ func NewPostOrderPickedUpRequestWithBody(server string, deliveryJobUuid openapi_
 	}
 
 	operationPath := fmt.Sprintf("/api/v1/delivery-jobs/%s/events/order-picked-up", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewCreateOpenRobotLidCommandRequest calls the generic CreateOpenRobotLidCommand builder with application/json body
-func NewCreateOpenRobotLidCommandRequest(server string, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewCreateOpenRobotLidCommandRequestWithBody(server, deliveryJobUuid, "application/json", bodyReader)
-}
-
-// NewCreateOpenRobotLidCommandRequestWithBody generates requests for CreateOpenRobotLidCommand with any type of body
-func NewCreateOpenRobotLidCommandRequestWithBody(server string, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "delivery_job_uuid", runtime.ParamLocationPath, deliveryJobUuid)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/api/v1/delivery-jobs/%s/robot-commands/open-lid", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -619,6 +668,14 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// GetDeliveryJobCurrentCourier request
+	GetDeliveryJobCurrentCourierWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobCurrentCourierResponse, error)
+
+	// CreateOpenRobotLidCommand request with any body
+	CreateOpenRobotLidCommandWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateOpenRobotLidCommandResponse, error)
+
+	CreateOpenRobotLidCommandWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateOpenRobotLidCommandResponse, error)
+
 	// PostOrderDroppedOff request with any body
 	PostOrderDroppedOffWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrderDroppedOffResponse, error)
 
@@ -628,11 +685,6 @@ type ClientWithResponsesInterface interface {
 	PostOrderPickedUpWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrderPickedUpResponse, error)
 
 	PostOrderPickedUpWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body PostOrderPickedUpJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrderPickedUpResponse, error)
-
-	// CreateOpenRobotLidCommand request with any body
-	CreateOpenRobotLidCommandWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateOpenRobotLidCommandResponse, error)
-
-	CreateOpenRobotLidCommandWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateOpenRobotLidCommandResponse, error)
 
 	// CreateOrder request with any body
 	CreateOrderWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateOrderResponse, error)
@@ -651,6 +703,50 @@ type ClientWithResponsesInterface interface {
 	SetWebhooksWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SetWebhooksResponse, error)
 
 	SetWebhooksWithResponse(ctx context.Context, body SetWebhooksJSONRequestBody, reqEditors ...RequestEditorFn) (*SetWebhooksResponse, error)
+}
+
+type GetDeliveryJobCurrentCourierResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Courier
+}
+
+// Status returns HTTPResponse.Status
+func (r GetDeliveryJobCurrentCourierResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetDeliveryJobCurrentCourierResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateOpenRobotLidCommandResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *InvalidClientActionError
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateOpenRobotLidCommandResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateOpenRobotLidCommandResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type PostOrderDroppedOffResponse struct {
@@ -693,28 +789,6 @@ func (r PostOrderPickedUpResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r PostOrderPickedUpResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type CreateOpenRobotLidCommandResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON400      *InvalidClientActionError
-}
-
-// Status returns HTTPResponse.Status
-func (r CreateOpenRobotLidCommandResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r CreateOpenRobotLidCommandResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -812,6 +886,32 @@ func (r SetWebhooksResponse) StatusCode() int {
 	return 0
 }
 
+// GetDeliveryJobCurrentCourierWithResponse request returning *GetDeliveryJobCurrentCourierResponse
+func (c *ClientWithResponses) GetDeliveryJobCurrentCourierWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobCurrentCourierResponse, error) {
+	rsp, err := c.GetDeliveryJobCurrentCourier(ctx, deliveryJobUuid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetDeliveryJobCurrentCourierResponse(rsp)
+}
+
+// CreateOpenRobotLidCommandWithBodyWithResponse request with arbitrary body returning *CreateOpenRobotLidCommandResponse
+func (c *ClientWithResponses) CreateOpenRobotLidCommandWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateOpenRobotLidCommandResponse, error) {
+	rsp, err := c.CreateOpenRobotLidCommandWithBody(ctx, deliveryJobUuid, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateOpenRobotLidCommandResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateOpenRobotLidCommandWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateOpenRobotLidCommandResponse, error) {
+	rsp, err := c.CreateOpenRobotLidCommand(ctx, deliveryJobUuid, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateOpenRobotLidCommandResponse(rsp)
+}
+
 // PostOrderDroppedOffWithBodyWithResponse request with arbitrary body returning *PostOrderDroppedOffResponse
 func (c *ClientWithResponses) PostOrderDroppedOffWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostOrderDroppedOffResponse, error) {
 	rsp, err := c.PostOrderDroppedOffWithBody(ctx, deliveryJobUuid, contentType, body, reqEditors...)
@@ -844,23 +944,6 @@ func (c *ClientWithResponses) PostOrderPickedUpWithResponse(ctx context.Context,
 		return nil, err
 	}
 	return ParsePostOrderPickedUpResponse(rsp)
-}
-
-// CreateOpenRobotLidCommandWithBodyWithResponse request with arbitrary body returning *CreateOpenRobotLidCommandResponse
-func (c *ClientWithResponses) CreateOpenRobotLidCommandWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateOpenRobotLidCommandResponse, error) {
-	rsp, err := c.CreateOpenRobotLidCommandWithBody(ctx, deliveryJobUuid, contentType, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateOpenRobotLidCommandResponse(rsp)
-}
-
-func (c *ClientWithResponses) CreateOpenRobotLidCommandWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CreateOpenRobotLidCommandJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateOpenRobotLidCommandResponse, error) {
-	rsp, err := c.CreateOpenRobotLidCommand(ctx, deliveryJobUuid, body, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateOpenRobotLidCommandResponse(rsp)
 }
 
 // CreateOrderWithBodyWithResponse request with arbitrary body returning *CreateOrderResponse
@@ -923,6 +1006,58 @@ func (c *ClientWithResponses) SetWebhooksWithResponse(ctx context.Context, body 
 	return ParseSetWebhooksResponse(rsp)
 }
 
+// ParseGetDeliveryJobCurrentCourierResponse parses an HTTP response from a GetDeliveryJobCurrentCourierWithResponse call
+func ParseGetDeliveryJobCurrentCourierResponse(rsp *http.Response) (*GetDeliveryJobCurrentCourierResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetDeliveryJobCurrentCourierResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Courier
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateOpenRobotLidCommandResponse parses an HTTP response from a CreateOpenRobotLidCommandWithResponse call
+func ParseCreateOpenRobotLidCommandResponse(rsp *http.Response) (*CreateOpenRobotLidCommandResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateOpenRobotLidCommandResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest InvalidClientActionError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParsePostOrderDroppedOffResponse parses an HTTP response from a PostOrderDroppedOffWithResponse call
 func ParsePostOrderDroppedOffResponse(rsp *http.Response) (*PostOrderDroppedOffResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -977,32 +1112,6 @@ func ParsePostOrderPickedUpResponse(rsp *http.Response) (*PostOrderPickedUpRespo
 		}
 		response.JSON200 = &dest
 
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest InvalidClientActionError
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON400 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseCreateOpenRobotLidCommandResponse parses an HTTP response from a CreateOpenRobotLidCommandWithResponse call
-func ParseCreateOpenRobotLidCommandResponse(rsp *http.Response) (*CreateOpenRobotLidCommandResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &CreateOpenRobotLidCommandResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
 		var dest InvalidClientActionError
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
