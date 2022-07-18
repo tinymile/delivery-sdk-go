@@ -389,6 +389,35 @@
           }
         }
       }
+    },
+    "/api/v1/delivery-jobs/{delivery_job_uuid}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_job_uuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "get-delivery-job",
+        "summary": "Fetch delivery job",
+        "responses": {
+          "200": {
+            "description": "Delivery job",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryJob"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

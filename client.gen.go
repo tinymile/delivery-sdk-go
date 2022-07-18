@@ -91,6 +91,9 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// GetDeliveryJob request
+	GetDeliveryJob(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetDeliveryJobCurrentCourier request
 	GetDeliveryJobCurrentCourier(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -126,6 +129,18 @@ type ClientInterface interface {
 	SetWebhooksWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	SetWebhooks(ctx context.Context, body SetWebhooksJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) GetDeliveryJob(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDeliveryJobRequest(c.Server, deliveryJobUuid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) GetDeliveryJobCurrentCourier(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -294,6 +309,40 @@ func (c *Client) SetWebhooks(ctx context.Context, body SetWebhooksJSONRequestBod
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewGetDeliveryJobRequest generates requests for GetDeliveryJob
+func NewGetDeliveryJobRequest(server string, deliveryJobUuid openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "delivery_job_uuid", runtime.ParamLocationPath, deliveryJobUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/delivery-jobs/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewGetDeliveryJobCurrentCourierRequest generates requests for GetDeliveryJobCurrentCourier
@@ -668,6 +717,9 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// GetDeliveryJob request
+	GetDeliveryJobWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobResponse, error)
+
 	// GetDeliveryJobCurrentCourier request
 	GetDeliveryJobCurrentCourierWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobCurrentCourierResponse, error)
 
@@ -703,6 +755,28 @@ type ClientWithResponsesInterface interface {
 	SetWebhooksWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*SetWebhooksResponse, error)
 
 	SetWebhooksWithResponse(ctx context.Context, body SetWebhooksJSONRequestBody, reqEditors ...RequestEditorFn) (*SetWebhooksResponse, error)
+}
+
+type GetDeliveryJobResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DeliveryJob
+}
+
+// Status returns HTTPResponse.Status
+func (r GetDeliveryJobResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetDeliveryJobResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
 }
 
 type GetDeliveryJobCurrentCourierResponse struct {
@@ -886,6 +960,15 @@ func (r SetWebhooksResponse) StatusCode() int {
 	return 0
 }
 
+// GetDeliveryJobWithResponse request returning *GetDeliveryJobResponse
+func (c *ClientWithResponses) GetDeliveryJobWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobResponse, error) {
+	rsp, err := c.GetDeliveryJob(ctx, deliveryJobUuid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetDeliveryJobResponse(rsp)
+}
+
 // GetDeliveryJobCurrentCourierWithResponse request returning *GetDeliveryJobCurrentCourierResponse
 func (c *ClientWithResponses) GetDeliveryJobCurrentCourierWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobCurrentCourierResponse, error) {
 	rsp, err := c.GetDeliveryJobCurrentCourier(ctx, deliveryJobUuid, reqEditors...)
@@ -1004,6 +1087,32 @@ func (c *ClientWithResponses) SetWebhooksWithResponse(ctx context.Context, body 
 		return nil, err
 	}
 	return ParseSetWebhooksResponse(rsp)
+}
+
+// ParseGetDeliveryJobResponse parses an HTTP response from a GetDeliveryJobWithResponse call
+func ParseGetDeliveryJobResponse(rsp *http.Response) (*GetDeliveryJobResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetDeliveryJobResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DeliveryJob
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseGetDeliveryJobCurrentCourierResponse parses an HTTP response from a GetDeliveryJobCurrentCourierWithResponse call
