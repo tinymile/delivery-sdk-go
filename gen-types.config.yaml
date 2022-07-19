@@ -1,4 +1,4 @@
 package: delivery_sdk
 generate:
-  models: true
+  - types
 output: types.gen.go

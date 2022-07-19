@@ -1,4 +1,4 @@
 package: delivery_sdk
 generate:
-  client: true
+  - client
 output: client.gen.go
