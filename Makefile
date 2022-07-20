@@ -6,7 +6,7 @@ ALL_TARGETS := \
 	types.gen.go \
 	client.gen.go
 
-OAPI_CODEGEN_CMD := go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.10.1
+OAPI_CODEGEN_CMD := go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen
 
 DOCKER_RUN := docker run --user $(shell id -u) --rm
 
