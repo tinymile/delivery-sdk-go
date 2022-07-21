@@ -603,7 +603,8 @@
           "receiver",
           "pickUpService",
           "dropOffService",
-          "deliveryCharges"
+          "deliveryCharges",
+          "packageHolder"
         ],
         "properties": {
           "uuid": {
@@ -644,6 +645,15 @@
           },
           "deliveryCharges": {
             "$ref": "#/components/schemas/DeliveryCharges"
+          },
+          "packageHolder": {
+            "type": "string",
+            "enum": [
+              "shipper",
+              "receiver",
+              "courier",
+              "unknown"
+            ]
           }
         }
       },

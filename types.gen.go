@@ -76,6 +76,17 @@ const (
 	CourierEventKindCourierStoppedAcceptingDeliveries CourierEventKind = "courier-stopped-accepting-deliveries"
 )
 
+// Defines values for DeliveryJobPackageHolder.
+const (
+	DeliveryJobPackageHolderCourier DeliveryJobPackageHolder = "courier"
+
+	DeliveryJobPackageHolderReceiver DeliveryJobPackageHolder = "receiver"
+
+	DeliveryJobPackageHolderShipper DeliveryJobPackageHolder = "shipper"
+
+	DeliveryJobPackageHolderUnknown DeliveryJobPackageHolder = "unknown"
+)
+
 // Defines values for DeliveryJobStage.
 const (
 	DeliveryJobStageCourierAssignment DeliveryJobStage = "courier-assignment"
@@ -207,16 +218,20 @@ type DeliveryCharges struct {
 
 // DeliveryJob defines model for DeliveryJob.
 type DeliveryJob struct {
-	CompletedAt        *time.Time          `json:"completedAt,omitempty"`
-	CurrentCourierUUID *openapi_types.UUID `json:"currentCourierUUID,omitempty"`
-	DeliveryCharges    DeliveryCharges     `json:"deliveryCharges"`
-	DeliveryOrderUUID  openapi_types.UUID  `json:"deliveryOrderUUID"`
-	DropOffService     DeliveryService     `json:"dropOffService"`
-	NextCourierUUID    *openapi_types.UUID `json:"nextCourierUUID,omitempty"`
-	PickUpService      DeliveryService     `json:"pickUpService"`
-	Stage              DeliveryJobStage    `json:"stage"`
-	Uuid               openapi_types.UUID  `json:"uuid"`
+	CompletedAt        *time.Time               `json:"completedAt,omitempty"`
+	CurrentCourierUUID *openapi_types.UUID      `json:"currentCourierUUID,omitempty"`
+	DeliveryCharges    DeliveryCharges          `json:"deliveryCharges"`
+	DeliveryOrderUUID  openapi_types.UUID       `json:"deliveryOrderUUID"`
+	DropOffService     DeliveryService          `json:"dropOffService"`
+	NextCourierUUID    *openapi_types.UUID      `json:"nextCourierUUID,omitempty"`
+	PackageHolder      DeliveryJobPackageHolder `json:"packageHolder"`
+	PickUpService      DeliveryService          `json:"pickUpService"`
+	Stage              DeliveryJobStage         `json:"stage"`
+	Uuid               openapi_types.UUID       `json:"uuid"`
 }
+
+// DeliveryJobPackageHolder defines model for DeliveryJob.PackageHolder.
+type DeliveryJobPackageHolder string
 
 // DeliveryJobStage defines model for DeliveryJob.Stage.
 type DeliveryJobStage string
