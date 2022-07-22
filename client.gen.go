@@ -826,7 +826,6 @@ func (r CreateOpenRobotLidCommandResponse) StatusCode() int {
 type PostOrderDroppedOffResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *DeliveryJob
 	JSON400      *InvalidClientActionError
 }
 
@@ -849,7 +848,6 @@ func (r PostOrderDroppedOffResponse) StatusCode() int {
 type PostOrderPickedUpResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *DeliveryJob
 	JSON400      *InvalidClientActionError
 }
 
@@ -1181,13 +1179,6 @@ func ParsePostOrderDroppedOffResponse(rsp *http.Response) (*PostOrderDroppedOffR
 	}
 
 	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest DeliveryJob
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
 		var dest InvalidClientActionError
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -1214,13 +1205,6 @@ func ParsePostOrderPickedUpResponse(rsp *http.Response) (*PostOrderPickedUpRespo
 	}
 
 	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest DeliveryJob
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
 		var dest InvalidClientActionError
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

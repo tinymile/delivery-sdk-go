@@ -323,14 +323,10 @@
           }
         },
         "responses": {
-          "200": {
+          "202": {
             "description": "Event received. If a robot is doing the delivery, this will also notify it to close the lid.",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeliveryJob"
-                }
-              }
+              "application/json": {}
             }
           },
           "400": {
@@ -367,14 +363,10 @@
           }
         },
         "responses": {
-          "200": {
+          "202": {
             "description": "Event received. If a robot is doing the delivery, this will also notify it to close the lid.",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeliveryJob"
-                }
-              }
+              "application/json": {}
             }
           },
           "400": {
