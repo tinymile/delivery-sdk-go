@@ -10,7 +10,7 @@ For the development version, see https://external-api.dev.gcp.tinymile.ai/doc . 
 
 # API Compatibility
 
-The SDK is guaranteed to be forwards compatible with the API of the same major version.
+The API is in alpha stage, so breaking changes are expected. Once it matures forwards and backwards compatibility will be enforced.
 
 # Contributing
 
