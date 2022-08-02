@@ -222,10 +222,12 @@ type DeliveryJob struct {
 	CurrentCourierUUID *openapi_types.UUID      `json:"currentCourierUUID,omitempty"`
 	DeliveryCharges    DeliveryCharges          `json:"deliveryCharges"`
 	DeliveryOrderUUID  openapi_types.UUID       `json:"deliveryOrderUUID"`
-	DropOffService     DeliveryService          `json:"dropOffService"`
+	DropOffAddress     CompleteAddress          `json:"dropOffAddress"`
+	DropOffEstimatedAt time.Time                `json:"dropOffEstimatedAt"`
 	NextCourierUUID    *openapi_types.UUID      `json:"nextCourierUUID,omitempty"`
 	PackageHolder      DeliveryJobPackageHolder `json:"packageHolder"`
-	PickUpService      DeliveryService          `json:"pickUpService"`
+	PickUpAddress      CompleteAddress          `json:"pickUpAddress"`
+	PickUpEstimatedAt  time.Time                `json:"pickUpEstimatedAt"`
 	Stage              DeliveryJobStage         `json:"stage"`
 	Uuid               openapi_types.UUID       `json:"uuid"`
 }
@@ -267,18 +269,18 @@ type DeliveryOrderStatus string
 
 // DeliveryOrderCreationRequest defines model for DeliveryOrderCreationRequest.
 type DeliveryOrderCreationRequest struct {
-	DropOffAddress     CompleteAddress    `json:"dropOffAddress"`
-	DropOffDeadlineAt  *time.Time         `json:"dropOffDeadlineAt,omitempty"`
-	DropOffNotes       *string            `json:"dropOffNotes,omitempty"`
-	DropOffNotifyParty *NotifyParty       `json:"dropOffNotifyParty,omitempty"`
-	ExternalID         string             `json:"externalID"`
-	IsMock             *bool              `json:"isMock,omitempty"`
-	PickUpAddress      CompleteAddress    `json:"pickUpAddress"`
-	PickUpDeadlineAt   *time.Time         `json:"pickUpDeadlineAt,omitempty"`
-	PickUpNotes        *string            `json:"pickUpNotes,omitempty"`
-	PickUpNotifyParty  *NotifyParty       `json:"pickUpNotifyParty,omitempty"`
-	Receiver           DeliveryOrderParty `json:"receiver"`
-	Shipper            DeliveryOrderParty `json:"shipper"`
+	DropOffAddress     CompleteAddress             `json:"dropOffAddress"`
+	DropOffDeadlineAt  *time.Time                  `json:"dropOffDeadlineAt,omitempty"`
+	DropOffNotes       *string                     `json:"dropOffNotes,omitempty"`
+	DropOffNotifyParty *DeliveryServiceNotifyParty `json:"dropOffNotifyParty,omitempty"`
+	ExternalID         string                      `json:"externalID"`
+	IsMock             *bool                       `json:"isMock,omitempty"`
+	PickUpAddress      CompleteAddress             `json:"pickUpAddress"`
+	PickUpDeadlineAt   *time.Time                  `json:"pickUpDeadlineAt,omitempty"`
+	PickUpNotes        *string                     `json:"pickUpNotes,omitempty"`
+	PickUpNotifyParty  *DeliveryServiceNotifyParty `json:"pickUpNotifyParty,omitempty"`
+	Receiver           DeliveryOrderParty          `json:"receiver"`
+	Shipper            DeliveryOrderParty          `json:"shipper"`
 }
 
 // DeliveryOrderParty defines model for DeliveryOrderParty.
@@ -322,13 +324,19 @@ type DeliveryOrderRejectionReason string
 
 // DeliveryService defines model for DeliveryService.
 type DeliveryService struct {
-	Address                CompleteAddress `json:"address"`
-	DeadlineAt             time.Time       `json:"deadlineAt"`
-	EstimatedAt            time.Time       `json:"estimatedAt"`
-	IsSelfServiceAvailable bool            `json:"isSelfServiceAvailable"`
-	Notes                  string          `json:"notes"`
-	NotifyParty            NotifyParty     `json:"notifyParty"`
-	ServiceAfter           time.Time       `json:"serviceAfter"`
+	Address                CompleteAddress            `json:"address"`
+	DeadlineAt             time.Time                  `json:"deadlineAt"`
+	IsSelfServiceAvailable bool                       `json:"isSelfServiceAvailable"`
+	Notes                  string                     `json:"notes"`
+	NotifyParty            DeliveryServiceNotifyParty `json:"notifyParty"`
+	ServiceAfter           time.Time                  `json:"serviceAfter"`
+}
+
+// DeliveryServiceNotifyParty defines model for DeliveryServiceNotifyParty.
+type DeliveryServiceNotifyParty struct {
+	Email       *string `json:"email,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	PhoneNumber *string `json:"phoneNumber,omitempty"`
 }
 
 // GeocodeLogEntry defines model for GeocodeLogEntry.
@@ -352,13 +360,6 @@ type InvalidClientActionError struct {
 
 // InvalidClientActionErrorReason defines model for InvalidClientActionError.Reason.
 type InvalidClientActionErrorReason string
-
-// NotifyParty defines model for NotifyParty.
-type NotifyParty struct {
-	Email       *string `json:"email,omitempty"`
-	Name        *string `json:"name,omitempty"`
-	PhoneNumber *string `json:"phoneNumber,omitempty"`
-}
 
 // RequestQuoteClientErrorResponse defines model for RequestQuoteClientErrorResponse.
 type RequestQuoteClientErrorResponse interface{}

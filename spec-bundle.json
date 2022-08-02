@@ -518,61 +518,6 @@
           }
         }
       },
-      "NotifyParty": {
-        "type": "object",
-        "required": [],
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string",
-            "format": "string"
-          },
-          "phoneNumber": {
-            "type": "string",
-            "format": "phone"
-          }
-        }
-      },
-      "DeliveryService": {
-        "type": "object",
-        "required": [
-          "address",
-          "serviceAfter",
-          "deadlineAt",
-          "notes",
-          "isSelfServiceAvailable",
-          "estimatedAt",
-          "notifyParty"
-        ],
-        "properties": {
-          "address": {
-            "$ref": "#/components/schemas/CompleteAddress"
-          },
-          "serviceAfter": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "deadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "notes": {
-            "type": "string"
-          },
-          "isSelfServiceAvailable": {
-            "type": "boolean"
-          },
-          "estimatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "notifyParty": {
-            "$ref": "#/components/schemas/NotifyParty"
-          }
-        }
-      },
       "DeliveryCharges": {
         "type": "object",
         "required": [
@@ -593,8 +538,10 @@
           "deliveryOrderUUID",
           "shipper",
           "receiver",
-          "pickUpService",
-          "dropOffService",
+          "pickUpAddress",
+          "pickUpEstimatedAt",
+          "dropOffAddress",
+          "dropOffEstimatedAt",
           "deliveryCharges",
           "packageHolder"
         ],
@@ -617,11 +564,19 @@
             "type": "string",
             "format": "uuid"
           },
-          "pickUpService": {
-            "$ref": "#/components/schemas/DeliveryService"
+          "pickUpAddress": {
+            "$ref": "#/components/schemas/CompleteAddress"
           },
-          "dropOffService": {
-            "$ref": "#/components/schemas/DeliveryService"
+          "pickUpEstimatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dropOffAddress": {
+            "$ref": "#/components/schemas/CompleteAddress"
+          },
+          "dropOffEstimatedAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "currentCourierUUID": {
             "type": "string",
@@ -957,6 +912,23 @@
           }
         }
       },
+      "DeliveryServiceNotifyParty": {
+        "type": "object",
+        "required": [],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "string"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "format": "phone"
+          }
+        }
+      },
       "DeliveryOrderCreationRequest": {
         "type": "object",
         "required": [
@@ -980,7 +952,7 @@
             "$ref": "#/components/schemas/CompleteAddress"
           },
           "pickUpNotifyParty": {
-            "$ref": "#/components/schemas/NotifyParty"
+            "$ref": "#/components/schemas/DeliveryServiceNotifyParty"
           },
           "pickUpDeadlineAt": {
             "type": "string",
@@ -993,7 +965,7 @@
             "$ref": "#/components/schemas/CompleteAddress"
           },
           "dropOffNotifyParty": {
-            "$ref": "#/components/schemas/NotifyParty"
+            "$ref": "#/components/schemas/DeliveryServiceNotifyParty"
           },
           "dropOffDeadlineAt": {
             "type": "string",
@@ -1004,6 +976,40 @@
           },
           "isMock": {
             "type": "boolean"
+          }
+        }
+      },
+      "DeliveryService": {
+        "type": "object",
+        "required": [
+          "address",
+          "serviceAfter",
+          "deadlineAt",
+          "notes",
+          "isSelfServiceAvailable",
+          "estimatedAt",
+          "notifyParty"
+        ],
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/CompleteAddress"
+          },
+          "serviceAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "isSelfServiceAvailable": {
+            "type": "boolean"
+          },
+          "notifyParty": {
+            "$ref": "#/components/schemas/DeliveryServiceNotifyParty"
           }
         }
       },
