@@ -665,6 +665,21 @@
           }
         }
       },
+      "CourierDestination": {
+        "type": "object",
+        "required": [
+          "geocodedAddress"
+        ],
+        "properties": {
+          "geocodedAddress": {
+            "$ref": "#/components/schemas/GeocodedAddress"
+          },
+          "eta": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "Courier": {
         "type": "object",
         "required": [
@@ -713,6 +728,9 @@
           "activeDeliveryUuid": {
             "type": "string",
             "format": "uuid"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/CourierDestination"
           }
         }
       },

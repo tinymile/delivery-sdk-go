@@ -181,13 +181,14 @@ type CompleteAddress struct {
 
 // Courier defines model for Courier.
 type Courier struct {
-	ActiveDeliveryUuid    openapi_types.UUID `json:"activeDeliveryUuid"`
-	IsAcceptingDeliveries bool               `json:"isAcceptingDeliveries"`
-	LastKnownPosition     *GeocodeLogEntry   `json:"lastKnownPosition,omitempty"`
-	Name                  string             `json:"name"`
-	State                 CourierState       `json:"state"`
-	Type                  CourierType        `json:"type"`
-	Uuid                  openapi_types.UUID `json:"uuid"`
+	ActiveDeliveryUuid    openapi_types.UUID  `json:"activeDeliveryUuid"`
+	Destination           *CourierDestination `json:"destination,omitempty"`
+	IsAcceptingDeliveries bool                `json:"isAcceptingDeliveries"`
+	LastKnownPosition     *GeocodeLogEntry    `json:"lastKnownPosition,omitempty"`
+	Name                  string              `json:"name"`
+	State                 CourierState        `json:"state"`
+	Type                  CourierType         `json:"type"`
+	Uuid                  openapi_types.UUID  `json:"uuid"`
 }
 
 // CourierState defines model for Courier.State.
@@ -195,6 +196,12 @@ type CourierState string
 
 // CourierType defines model for Courier.Type.
 type CourierType string
+
+// CourierDestination defines model for CourierDestination.
+type CourierDestination struct {
+	Eta             *time.Time      `json:"eta,omitempty"`
+	GeocodedAddress GeocodedAddress `json:"geocodedAddress"`
+}
 
 // CourierEvent defines model for CourierEvent.
 type CourierEvent struct {
