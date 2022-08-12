@@ -410,6 +410,46 @@
           }
         }
       }
+    },
+    "/api/v1/delivery-jobs/{delivery_job_uuid}/cancel": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_job_uuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "cancel-delivery-job",
+        "summary": "Cancel delivery job",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Delivery job cancelled",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Cancellation failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidClientActionError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

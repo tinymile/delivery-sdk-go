@@ -383,6 +383,9 @@ type Webhooks struct {
 	DeliveryJobEvents Webhook `json:"deliveryJobEvents"`
 }
 
+// CancelDeliveryJobJSONBody defines parameters for CancelDeliveryJob.
+type CancelDeliveryJobJSONBody interface{}
+
 // CreateOpenRobotLidCommandJSONBody defines parameters for CreateOpenRobotLidCommand.
 type CreateOpenRobotLidCommandJSONBody interface{}
 
@@ -400,6 +403,9 @@ type RequestQuoteJSONBody DeliveryOrderQuoteRequest
 
 // SetWebhooksJSONBody defines parameters for SetWebhooks.
 type SetWebhooksJSONBody Webhooks
+
+// CancelDeliveryJobJSONRequestBody defines body for CancelDeliveryJob for application/json ContentType.
+type CancelDeliveryJobJSONRequestBody CancelDeliveryJobJSONBody
 
 // CreateOpenRobotLidCommandJSONRequestBody defines body for CreateOpenRobotLidCommand for application/json ContentType.
 type CreateOpenRobotLidCommandJSONRequestBody CreateOpenRobotLidCommandJSONBody

@@ -94,6 +94,11 @@ type ClientInterface interface {
 	// GetDeliveryJob request
 	GetDeliveryJob(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CancelDeliveryJob request with any body
+	CancelDeliveryJobWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CancelDeliveryJob(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CancelDeliveryJobJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetDeliveryJobCurrentCourier request
 	GetDeliveryJobCurrentCourier(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -133,6 +138,30 @@ type ClientInterface interface {
 
 func (c *Client) GetDeliveryJob(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDeliveryJobRequest(c.Server, deliveryJobUuid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CancelDeliveryJobWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCancelDeliveryJobRequestWithBody(c.Server, deliveryJobUuid, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CancelDeliveryJob(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CancelDeliveryJobJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCancelDeliveryJobRequest(c.Server, deliveryJobUuid, body)
 	if err != nil {
 		return nil, err
 	}
@@ -341,6 +370,53 @@ func NewGetDeliveryJobRequest(server string, deliveryJobUuid openapi_types.UUID)
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewCancelDeliveryJobRequest calls the generic CancelDeliveryJob builder with application/json body
+func NewCancelDeliveryJobRequest(server string, deliveryJobUuid openapi_types.UUID, body CancelDeliveryJobJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCancelDeliveryJobRequestWithBody(server, deliveryJobUuid, "application/json", bodyReader)
+}
+
+// NewCancelDeliveryJobRequestWithBody generates requests for CancelDeliveryJob with any type of body
+func NewCancelDeliveryJobRequestWithBody(server string, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "delivery_job_uuid", runtime.ParamLocationPath, deliveryJobUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/delivery-jobs/%s/cancel", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -720,6 +796,11 @@ type ClientWithResponsesInterface interface {
 	// GetDeliveryJob request
 	GetDeliveryJobWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobResponse, error)
 
+	// CancelDeliveryJob request with any body
+	CancelDeliveryJobWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CancelDeliveryJobResponse, error)
+
+	CancelDeliveryJobWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CancelDeliveryJobJSONRequestBody, reqEditors ...RequestEditorFn) (*CancelDeliveryJobResponse, error)
+
 	// GetDeliveryJobCurrentCourier request
 	GetDeliveryJobCurrentCourierWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobCurrentCourierResponse, error)
 
@@ -773,6 +854,28 @@ func (r GetDeliveryJobResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetDeliveryJobResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CancelDeliveryJobResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *InvalidClientActionError
+}
+
+// Status returns HTTPResponse.Status
+func (r CancelDeliveryJobResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CancelDeliveryJobResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -967,6 +1070,23 @@ func (c *ClientWithResponses) GetDeliveryJobWithResponse(ctx context.Context, de
 	return ParseGetDeliveryJobResponse(rsp)
 }
 
+// CancelDeliveryJobWithBodyWithResponse request with arbitrary body returning *CancelDeliveryJobResponse
+func (c *ClientWithResponses) CancelDeliveryJobWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CancelDeliveryJobResponse, error) {
+	rsp, err := c.CancelDeliveryJobWithBody(ctx, deliveryJobUuid, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCancelDeliveryJobResponse(rsp)
+}
+
+func (c *ClientWithResponses) CancelDeliveryJobWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body CancelDeliveryJobJSONRequestBody, reqEditors ...RequestEditorFn) (*CancelDeliveryJobResponse, error) {
+	rsp, err := c.CancelDeliveryJob(ctx, deliveryJobUuid, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCancelDeliveryJobResponse(rsp)
+}
+
 // GetDeliveryJobCurrentCourierWithResponse request returning *GetDeliveryJobCurrentCourierResponse
 func (c *ClientWithResponses) GetDeliveryJobCurrentCourierWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobCurrentCourierResponse, error) {
 	rsp, err := c.GetDeliveryJobCurrentCourier(ctx, deliveryJobUuid, reqEditors...)
@@ -1107,6 +1227,32 @@ func ParseGetDeliveryJobResponse(rsp *http.Response) (*GetDeliveryJobResponse, e
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCancelDeliveryJobResponse parses an HTTP response from a CancelDeliveryJobWithResponse call
+func ParseCancelDeliveryJobResponse(rsp *http.Response) (*CancelDeliveryJobResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CancelDeliveryJobResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest InvalidClientActionError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
 
 	}
 
