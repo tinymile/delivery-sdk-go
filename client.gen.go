@@ -94,6 +94,11 @@ type ClientInterface interface {
 	// GetDeliveryJob request
 	GetDeliveryJob(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PostJobCancelled request with any body
+	PostJobCancelledWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	PostJobCancelled(ctx context.Context, deliveryJobUuid openapi_types.UUID, body PostJobCancelledJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetDeliveryJobCurrentCourier request
 	GetDeliveryJobCurrentCourier(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -112,10 +117,16 @@ type ClientInterface interface {
 
 	PostOrderPickedUp(ctx context.Context, deliveryJobUuid openapi_types.UUID, body PostOrderPickedUpJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetOrderByExternalId request
+	GetOrderByExternalId(ctx context.Context, externalId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateOrder request with any body
 	CreateOrderWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateOrder(ctx context.Context, body CreateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetOrder request
+	GetOrder(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetJobsForOrder request
 	GetJobsForOrder(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -133,6 +144,30 @@ type ClientInterface interface {
 
 func (c *Client) GetDeliveryJob(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetDeliveryJobRequest(c.Server, deliveryJobUuid)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostJobCancelledWithBody(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostJobCancelledRequestWithBody(c.Server, deliveryJobUuid, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PostJobCancelled(ctx context.Context, deliveryJobUuid openapi_types.UUID, body PostJobCancelledJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPostJobCancelledRequest(c.Server, deliveryJobUuid, body)
 	if err != nil {
 		return nil, err
 	}
@@ -227,6 +262,18 @@ func (c *Client) PostOrderPickedUp(ctx context.Context, deliveryJobUuid openapi_
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetOrderByExternalId(ctx context.Context, externalId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOrderByExternalIdRequest(c.Server, externalId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) CreateOrderWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateOrderRequestWithBody(c.Server, contentType, body)
 	if err != nil {
@@ -241,6 +288,18 @@ func (c *Client) CreateOrderWithBody(ctx context.Context, contentType string, bo
 
 func (c *Client) CreateOrder(ctx context.Context, body CreateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateOrderRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetOrder(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetOrderRequest(c.Server, orderUuid)
 	if err != nil {
 		return nil, err
 	}
@@ -341,6 +400,53 @@ func NewGetDeliveryJobRequest(server string, deliveryJobUuid openapi_types.UUID)
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewPostJobCancelledRequest calls the generic PostJobCancelled builder with application/json body
+func NewPostJobCancelledRequest(server string, deliveryJobUuid openapi_types.UUID, body PostJobCancelledJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPostJobCancelledRequestWithBody(server, deliveryJobUuid, "application/json", bodyReader)
+}
+
+// NewPostJobCancelledRequestWithBody generates requests for PostJobCancelled with any type of body
+func NewPostJobCancelledRequestWithBody(server string, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "delivery_job_uuid", runtime.ParamLocationPath, deliveryJobUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/delivery-jobs/%s/commands/cancel", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -520,6 +626,40 @@ func NewPostOrderPickedUpRequestWithBody(server string, deliveryJobUuid openapi_
 	return req, nil
 }
 
+// NewGetOrderByExternalIdRequest generates requests for GetOrderByExternalId
+func NewGetOrderByExternalIdRequest(server string, externalId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "external_id", runtime.ParamLocationPath, externalId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/external-ids/%s/order", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewCreateOrderRequest calls the generic CreateOrder builder with application/json body
 func NewCreateOrderRequest(server string, body CreateOrderJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -556,6 +696,40 @@ func NewCreateOrderRequestWithBody(server string, contentType string, body io.Re
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetOrderRequest generates requests for GetOrder
+func NewGetOrderRequest(server string, orderUuid openapi_types.UUID) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "order_uuid", runtime.ParamLocationPath, orderUuid)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/api/v1/orders/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -720,6 +894,11 @@ type ClientWithResponsesInterface interface {
 	// GetDeliveryJob request
 	GetDeliveryJobWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobResponse, error)
 
+	// PostJobCancelled request with any body
+	PostJobCancelledWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostJobCancelledResponse, error)
+
+	PostJobCancelledWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body PostJobCancelledJSONRequestBody, reqEditors ...RequestEditorFn) (*PostJobCancelledResponse, error)
+
 	// GetDeliveryJobCurrentCourier request
 	GetDeliveryJobCurrentCourierWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetDeliveryJobCurrentCourierResponse, error)
 
@@ -738,10 +917,16 @@ type ClientWithResponsesInterface interface {
 
 	PostOrderPickedUpWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body PostOrderPickedUpJSONRequestBody, reqEditors ...RequestEditorFn) (*PostOrderPickedUpResponse, error)
 
+	// GetOrderByExternalId request
+	GetOrderByExternalIdWithResponse(ctx context.Context, externalId string, reqEditors ...RequestEditorFn) (*GetOrderByExternalIdResponse, error)
+
 	// CreateOrder request with any body
 	CreateOrderWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateOrderResponse, error)
 
 	CreateOrderWithResponse(ctx context.Context, body CreateOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateOrderResponse, error)
+
+	// GetOrder request
+	GetOrderWithResponse(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetOrderResponse, error)
 
 	// GetJobsForOrder request
 	GetJobsForOrderWithResponse(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetJobsForOrderResponse, error)
@@ -773,6 +958,28 @@ func (r GetDeliveryJobResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetDeliveryJobResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type PostJobCancelledResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *InvalidClientActionError
+}
+
+// Status returns HTTPResponse.Status
+func (r PostJobCancelledResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PostJobCancelledResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -867,6 +1074,28 @@ func (r PostOrderPickedUpResponse) StatusCode() int {
 	return 0
 }
 
+type GetOrderByExternalIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DeliveryOrder
+}
+
+// Status returns HTTPResponse.Status
+func (r GetOrderByExternalIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetOrderByExternalIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type CreateOrderResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -884,6 +1113,28 @@ func (r CreateOrderResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r CreateOrderResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetOrderResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DeliveryOrder
+}
+
+// Status returns HTTPResponse.Status
+func (r GetOrderResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetOrderResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -939,7 +1190,7 @@ type SetWebhooksResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *Webhooks
-	JSON400      *interface{}
+	JSON400      *SetWebhookError
 }
 
 // Status returns HTTPResponse.Status
@@ -965,6 +1216,23 @@ func (c *ClientWithResponses) GetDeliveryJobWithResponse(ctx context.Context, de
 		return nil, err
 	}
 	return ParseGetDeliveryJobResponse(rsp)
+}
+
+// PostJobCancelledWithBodyWithResponse request with arbitrary body returning *PostJobCancelledResponse
+func (c *ClientWithResponses) PostJobCancelledWithBodyWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PostJobCancelledResponse, error) {
+	rsp, err := c.PostJobCancelledWithBody(ctx, deliveryJobUuid, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostJobCancelledResponse(rsp)
+}
+
+func (c *ClientWithResponses) PostJobCancelledWithResponse(ctx context.Context, deliveryJobUuid openapi_types.UUID, body PostJobCancelledJSONRequestBody, reqEditors ...RequestEditorFn) (*PostJobCancelledResponse, error) {
+	rsp, err := c.PostJobCancelled(ctx, deliveryJobUuid, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePostJobCancelledResponse(rsp)
 }
 
 // GetDeliveryJobCurrentCourierWithResponse request returning *GetDeliveryJobCurrentCourierResponse
@@ -1027,6 +1295,15 @@ func (c *ClientWithResponses) PostOrderPickedUpWithResponse(ctx context.Context,
 	return ParsePostOrderPickedUpResponse(rsp)
 }
 
+// GetOrderByExternalIdWithResponse request returning *GetOrderByExternalIdResponse
+func (c *ClientWithResponses) GetOrderByExternalIdWithResponse(ctx context.Context, externalId string, reqEditors ...RequestEditorFn) (*GetOrderByExternalIdResponse, error) {
+	rsp, err := c.GetOrderByExternalId(ctx, externalId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetOrderByExternalIdResponse(rsp)
+}
+
 // CreateOrderWithBodyWithResponse request with arbitrary body returning *CreateOrderResponse
 func (c *ClientWithResponses) CreateOrderWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateOrderResponse, error) {
 	rsp, err := c.CreateOrderWithBody(ctx, contentType, body, reqEditors...)
@@ -1042,6 +1319,15 @@ func (c *ClientWithResponses) CreateOrderWithResponse(ctx context.Context, body 
 		return nil, err
 	}
 	return ParseCreateOrderResponse(rsp)
+}
+
+// GetOrderWithResponse request returning *GetOrderResponse
+func (c *ClientWithResponses) GetOrderWithResponse(ctx context.Context, orderUuid openapi_types.UUID, reqEditors ...RequestEditorFn) (*GetOrderResponse, error) {
+	rsp, err := c.GetOrder(ctx, orderUuid, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetOrderResponse(rsp)
 }
 
 // GetJobsForOrderWithResponse request returning *GetJobsForOrderResponse
@@ -1107,6 +1393,32 @@ func ParseGetDeliveryJobResponse(rsp *http.Response) (*GetDeliveryJobResponse, e
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePostJobCancelledResponse parses an HTTP response from a PostJobCancelledWithResponse call
+func ParsePostJobCancelledResponse(rsp *http.Response) (*PostJobCancelledResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PostJobCancelledResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest InvalidClientActionError
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
 
 	}
 
@@ -1217,6 +1529,32 @@ func ParsePostOrderPickedUpResponse(rsp *http.Response) (*PostOrderPickedUpRespo
 	return response, nil
 }
 
+// ParseGetOrderByExternalIdResponse parses an HTTP response from a GetOrderByExternalIdWithResponse call
+func ParseGetOrderByExternalIdResponse(rsp *http.Response) (*GetOrderByExternalIdResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetOrderByExternalIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DeliveryOrder
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCreateOrderResponse parses an HTTP response from a CreateOrderWithResponse call
 func ParseCreateOrderResponse(rsp *http.Response) (*CreateOrderResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -1244,6 +1582,32 @@ func ParseCreateOrderResponse(rsp *http.Response) (*CreateOrderResponse, error) 
 			return nil, err
 		}
 		response.JSON400 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetOrderResponse parses an HTTP response from a GetOrderWithResponse call
+func ParseGetOrderResponse(rsp *http.Response) (*GetOrderResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetOrderResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DeliveryOrder
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	}
 
@@ -1331,7 +1695,7 @@ func ParseSetWebhooksResponse(rsp *http.Response) (*SetWebhooksResponse, error) 
 		response.JSON200 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
-		var dest interface{}
+		var dest SetWebhookError
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
