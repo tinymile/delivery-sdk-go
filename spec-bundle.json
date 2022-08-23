@@ -21,218 +21,6 @@
     }
   ],
   "paths": {
-    "/api/v1/webhooks": {
-      "post": {
-        "operationId": "set-webhooks",
-        "summary": "Configure webhooks",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Webhooks"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "webhooks set successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Webhooks"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Can't set webhooks",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "SetWebhookError": {
-                    "required": [
-                      "message",
-                      "reason"
-                    ],
-                    "properties": {
-                      "message": {
-                        "type": "string"
-                      },
-                      "reason": {
-                        "type": "string",
-                        "enum": [
-                          "invalid-url"
-                        ]
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "callbacks": {
-          "deliveryJobEventsWebhook": {
-            "{$request.body#/deliveryJobEvents/url}": {
-              "post": {
-                "requestBody": {
-                  "required": true,
-                  "content": {
-                    "application/json": {
-                      "schema": {
-                        "$ref": "#/components/schemas/DeliveryJobEvent"
-                      }
-                    }
-                  }
-                },
-                "responses": {
-                  "2xx": {
-                    "description": "Your server returns this code if it accepts the event"
-                  },
-                  "default": {
-                    "description": "Your server couldn't process the event. We'll keep re-trying until it returns a successful status code."
-                  }
-                }
-              }
-            }
-          },
-          "courierEventsWebhook": {
-            "{$request.body#/courierEvents/url}": {
-              "post": {
-                "requestBody": {
-                  "required": true,
-                  "content": {
-                    "application/json": {
-                      "schema": {
-                        "$ref": "#/components/schemas/CourierEvent"
-                      }
-                    }
-                  }
-                },
-                "responses": {
-                  "2xx": {
-                    "description": "Your server returns this code if it accepts the event"
-                  },
-                  "default": {
-                    "description": "Your server couldn't process the event. We'll keep re-trying until it returns a successful status code."
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/quotes": {
-      "post": {
-        "operationId": "request-quote",
-        "summary": "Request a quote for an order",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeliveryOrderQuoteRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Quote was created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeliveryOrderQuote"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Quote was rejected",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RequestQuoteClientErrorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/orders": {
-      "post": {
-        "operationId": "create-order",
-        "summary": "Create an order",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeliveryOrderCreationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Order was created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeliveryOrder"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Order was rejected",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateOrderClientErrorResponse"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "An order with the same ID already exists"
-          }
-        }
-      }
-    },
-    "/api/v1/orders/{order_uuid}/delivery-jobs": {
-      "parameters": [
-        {
-          "in": "path",
-          "name": "order_uuid",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      ],
-      "get": {
-        "operationId": "get-jobs-for-order",
-        "summary": "Fetch delivery jobs of order",
-        "responses": {
-          "200": {
-            "description": "Delivery jobs associated with order",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DeliveryJob"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/delivery-jobs/{delivery_job_uuid}/couriers/current/open-lid": {
       "parameters": [
         {
@@ -382,6 +170,46 @@
         }
       }
     },
+    "/api/v1/delivery-jobs/{delivery_job_uuid}/commands/cancel": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "delivery_job_uuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "post": {
+        "operationId": "post-job-cancelled",
+        "summary": "Cancel an existing delivery job",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cancellation request received.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Cancellation request was rejected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvalidClientActionError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/delivery-jobs/{delivery_job_uuid}": {
       "parameters": [
         {
@@ -410,6 +238,259 @@
           }
         }
       }
+    },
+    "/api/v1/orders/{order_uuid}/delivery-jobs": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "order_uuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "get-jobs-for-order",
+        "summary": "Fetch delivery jobs of order",
+        "responses": {
+          "200": {
+            "description": "Delivery jobs associated with order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeliveryJob"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders/{order_uuid}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "order_uuid",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "get-order",
+        "summary": "Fetch a delivery order by its UUID",
+        "responses": {
+          "200": {
+            "description": "Order information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryOrder"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/orders": {
+      "post": {
+        "operationId": "create-order",
+        "summary": "Create an order",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryOrderCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order was created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryOrder"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Order was rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOrderClientErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "An order with the same ID already exists"
+          }
+        }
+      }
+    },
+    "/api/v1/external-ids/{external_id}/order": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "external_id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "operationId": "get-order-by-external-id",
+        "summary": "Fetch a delivery order using ID provided by client upon order creation",
+        "responses": {
+          "200": {
+            "description": "Delivery Order information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryOrder"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/quotes": {
+      "post": {
+        "operationId": "request-quote",
+        "summary": "Request a quote for an order",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryOrderQuoteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quote was created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryOrderQuote"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Quote was rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestQuoteClientErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/webhooks": {
+      "post": {
+        "operationId": "set-webhooks",
+        "summary": "Configure webhooks",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Webhooks"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "webhooks set successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Webhooks"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Can't set webhooks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetWebhookError"
+                }
+              }
+            }
+          }
+        },
+        "callbacks": {
+          "deliveryJobEventsWebhook": {
+            "{$request.body#/deliveryJobEvents/url}": {
+              "post": {
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/DeliveryJobEvent"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "2xx": {
+                    "description": "Your server returns this code if it accepts the event"
+                  },
+                  "default": {
+                    "description": "Your server couldn't process the event. We'll keep re-trying until it returns a successful status code."
+                  }
+                }
+              }
+            }
+          },
+          "courierEventsWebhook": {
+            "{$request.body#/courierEvents/url}": {
+              "post": {
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/CourierEvent"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "2xx": {
+                    "description": "Your server returns this code if it accepts the event"
+                  },
+                  "default": {
+                    "description": "Your server couldn't process the event. We'll keep re-trying until it returns a successful status code."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -421,32 +502,23 @@
       }
     },
     "schemas": {
-      "Webhook": {
+      "InvalidClientActionError": {
         "type": "object",
         "required": [
-          "url",
-          "api_key"
+          "reason",
+          "message"
         ],
         "properties": {
-          "url": {
-            "type": "string"
+          "reason": {
+            "type": "string",
+            "enum": [
+              "deactivated-client",
+              "invalid-argument",
+              "self-service-unavailable"
+            ]
           },
-          "api_key": {
+          "message": {
             "type": "string"
-          }
-        }
-      },
-      "Webhooks": {
-        "required": [
-          "deliveryJobEvents",
-          "courierEvents"
-        ],
-        "properties": {
-          "deliveryJobEvents": {
-            "$ref": "#/components/schemas/Webhook"
-          },
-          "courierEvents": {
-            "$ref": "#/components/schemas/Webhook"
           }
         }
       },
@@ -467,6 +539,91 @@
           },
           "googlePlaceID": {
             "type": "string"
+          }
+        }
+      },
+      "GeocodeLogEntry": {
+        "type": "object",
+        "required": [
+          "geocodedAddress",
+          "recordedAt"
+        ],
+        "properties": {
+          "geocodedAddress": {
+            "$ref": "#/components/schemas/GeocodedAddress"
+          },
+          "recordedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CourierDestination": {
+        "type": "object",
+        "required": [
+          "geocodedAddress"
+        ],
+        "properties": {
+          "geocodedAddress": {
+            "$ref": "#/components/schemas/GeocodedAddress"
+          },
+          "eta": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Courier": {
+        "type": "object",
+        "required": [
+          "uuid",
+          "type",
+          "name",
+          "state",
+          "isAcceptingDeliveries",
+          "activeDeliveryUuid"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "robot",
+              "conventional"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "unspecified",
+              "analyzing-delivery-offer",
+              "planning-pick-up-route",
+              "en-route-to-pick-up",
+              "waiting-for-pick-up",
+              "planning-drop-off-route",
+              "en-route-to-drop-off",
+              "waiting-for-drop-off",
+              "waiting-to-hand-over"
+            ]
+          },
+          "isAcceptingDeliveries": {
+            "type": "boolean"
+          },
+          "lastKnownPosition": {
+            "$ref": "#/components/schemas/GeocodeLogEntry"
+          },
+          "activeDeliveryUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "destination": {
+            "$ref": "#/components/schemas/CourierDestination"
           }
         }
       },
@@ -604,308 +761,6 @@
           }
         }
       },
-      "DeliveryJobEvent": {
-        "type": "object",
-        "required": [
-          "uuid",
-          "kind",
-          "producedAt",
-          "deliveryJob"
-        ],
-        "properties": {
-          "uuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "delivery-job-created",
-              "delivery-job-offered-to-courier",
-              "delivery-job-rejected-by-courier",
-              "delivery-job-assigned",
-              "delivery-job-unassigned",
-              "delivery-picked-up",
-              "delivery-completed",
-              "delivery-canceled",
-              "received-new-courier-position",
-              "delivery-job-offered-to-next-courier",
-              "delivery-job-rejected-by-next-courier",
-              "delivery-job-accepted-by-next-courier",
-              "delivery-handed-over",
-              "unassigned-next-courier",
-              "delivery-job-delegated-to-next-courier"
-            ]
-          },
-          "producedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "deliveryJobBefore": {
-            "$ref": "#/components/schemas/DeliveryJob"
-          },
-          "deliveryJob": {
-            "$ref": "#/components/schemas/DeliveryJob"
-          }
-        }
-      },
-      "GeocodeLogEntry": {
-        "type": "object",
-        "required": [
-          "geocodedAddress",
-          "recordedAt"
-        ],
-        "properties": {
-          "geocodedAddress": {
-            "$ref": "#/components/schemas/GeocodedAddress"
-          },
-          "recordedAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "CourierDestination": {
-        "type": "object",
-        "required": [
-          "geocodedAddress"
-        ],
-        "properties": {
-          "geocodedAddress": {
-            "$ref": "#/components/schemas/GeocodedAddress"
-          },
-          "eta": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "Courier": {
-        "type": "object",
-        "required": [
-          "uuid",
-          "type",
-          "name",
-          "state",
-          "isAcceptingDeliveries",
-          "activeDeliveryUuid"
-        ],
-        "properties": {
-          "uuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "robot",
-              "conventional"
-            ]
-          },
-          "name": {
-            "type": "string"
-          },
-          "state": {
-            "type": "string",
-            "enum": [
-              "unspecified",
-              "analyzing-delivery-offer",
-              "planning-pick-up-route",
-              "en-route-to-pick-up",
-              "waiting-for-pick-up",
-              "planning-drop-off-route",
-              "en-route-to-drop-off",
-              "waiting-for-drop-off",
-              "waiting-to-hand-over"
-            ]
-          },
-          "isAcceptingDeliveries": {
-            "type": "boolean"
-          },
-          "lastKnownPosition": {
-            "$ref": "#/components/schemas/GeocodeLogEntry"
-          },
-          "activeDeliveryUuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "destination": {
-            "$ref": "#/components/schemas/CourierDestination"
-          }
-        }
-      },
-      "CourierEvent": {
-        "type": "object",
-        "required": [
-          "uuid",
-          "kind",
-          "producedAt",
-          "courier"
-        ],
-        "properties": {
-          "uuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "courier-received-delivery-offer",
-              "courier-accepted-delivery-offer",
-              "courier-rejected-delivery-offer",
-              "courier-left-for-pick-up",
-              "courier-arrived-at-pick-up",
-              "courier-picked-up-package",
-              "courier-left-for-drop-off",
-              "courier-arrived-at-drop-off",
-              "courier-dropped-off-package",
-              "courier-aborted-delivery",
-              "courier-position-changed",
-              "courier-started-accepting-deliveries",
-              "courier-stopped-accepting-deliveries",
-              "courier-delegated-active-delivery",
-              "courier-prepared-to-hand-over",
-              "courier-handed-over-package"
-            ]
-          },
-          "producedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "courierBefore": {
-            "$ref": "#/components/schemas/Courier"
-          },
-          "courier": {
-            "$ref": "#/components/schemas/Courier"
-          }
-        }
-      },
-      "DeliveryOrderQuoteRequest": {
-        "type": "object",
-        "required": [
-          "pickUpAddress",
-          "dropOffAddress"
-        ],
-        "properties": {
-          "pickUpAddress": {
-            "$ref": "#/components/schemas/GeocodedAddress"
-          },
-          "dropOffAddress": {
-            "$ref": "#/components/schemas/GeocodedAddress"
-          },
-          "isMock": {
-            "type": "boolean"
-          }
-        }
-      },
-      "DeliveryOrderQuote": {
-        "type": "object",
-        "required": [
-          "uuid",
-          "receivedAt",
-          "goodUntil",
-          "pickUpAddress",
-          "pickUpAfter",
-          "pickUpDeadlineAt",
-          "dropOffAddress",
-          "dropOffAfter",
-          "dropOffDeadlineAt",
-          "deliveryCharges",
-          "isMock"
-        ],
-        "properties": {
-          "uuid": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "receivedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "goodUntil": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "pickUpAddress": {
-            "$ref": "#/components/schemas/CompleteAddress"
-          },
-          "pickUpAfter": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "pickUpDeadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dropOffAddress": {
-            "$ref": "#/components/schemas/CompleteAddress"
-          },
-          "dropOffAfter": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dropOffDeadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "deliveryCharges": {
-            "$ref": "#/components/schemas/DeliveryCharges"
-          },
-          "isMock": {
-            "type": "boolean"
-          }
-        }
-      },
-      "DeliveryOrderRejection": {
-        "type": "object",
-        "required": [
-          "reason",
-          "message"
-        ],
-        "properties": {
-          "reason": {
-            "type": "string",
-            "enum": [
-              "outside-delivery-area",
-              "delivery-distance-too-large",
-              "no-capacity",
-              "scheduled-delivery-not-supported"
-            ]
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "InvalidClientActionError": {
-        "type": "object",
-        "required": [
-          "reason",
-          "message"
-        ],
-        "properties": {
-          "reason": {
-            "type": "string",
-            "enum": [
-              "deactivated-client",
-              "invalid-argument"
-            ]
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "RequestQuoteClientErrorResponse": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/DeliveryOrderRejection"
-          },
-          {
-            "$ref": "#/components/schemas/InvalidClientActionError"
-          }
-        ]
-      },
       "DeliveryOrderParty": {
         "type": "object",
         "required": [
@@ -944,56 +799,6 @@
           "phoneNumber": {
             "type": "string",
             "format": "phone"
-          }
-        }
-      },
-      "DeliveryOrderCreationRequest": {
-        "type": "object",
-        "required": [
-          "externalID",
-          "shipper",
-          "receiver",
-          "pickUpAddress",
-          "dropOffAddress"
-        ],
-        "properties": {
-          "externalID": {
-            "type": "string"
-          },
-          "shipper": {
-            "$ref": "#/components/schemas/DeliveryOrderParty"
-          },
-          "receiver": {
-            "$ref": "#/components/schemas/DeliveryOrderParty"
-          },
-          "pickUpAddress": {
-            "$ref": "#/components/schemas/CompleteAddress"
-          },
-          "pickUpNotifyParty": {
-            "$ref": "#/components/schemas/DeliveryServiceNotifyParty"
-          },
-          "pickUpDeadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "pickUpNotes": {
-            "type": "string"
-          },
-          "dropOffAddress": {
-            "$ref": "#/components/schemas/CompleteAddress"
-          },
-          "dropOffNotifyParty": {
-            "$ref": "#/components/schemas/DeliveryServiceNotifyParty"
-          },
-          "dropOffDeadlineAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "dropOffNotes": {
-            "type": "string"
-          },
-          "isMock": {
-            "type": "boolean"
           }
         }
       },
@@ -1086,6 +891,77 @@
           }
         }
       },
+      "DeliveryOrderCreationRequest": {
+        "type": "object",
+        "required": [
+          "externalID",
+          "shipper",
+          "receiver",
+          "pickUpAddress",
+          "dropOffAddress"
+        ],
+        "properties": {
+          "externalID": {
+            "type": "string"
+          },
+          "shipper": {
+            "$ref": "#/components/schemas/DeliveryOrderParty"
+          },
+          "receiver": {
+            "$ref": "#/components/schemas/DeliveryOrderParty"
+          },
+          "pickUpAddress": {
+            "$ref": "#/components/schemas/CompleteAddress"
+          },
+          "pickUpNotifyParty": {
+            "$ref": "#/components/schemas/DeliveryServiceNotifyParty"
+          },
+          "pickUpDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pickUpNotes": {
+            "type": "string"
+          },
+          "dropOffAddress": {
+            "$ref": "#/components/schemas/CompleteAddress"
+          },
+          "dropOffNotifyParty": {
+            "$ref": "#/components/schemas/DeliveryServiceNotifyParty"
+          },
+          "dropOffDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dropOffNotes": {
+            "type": "string"
+          },
+          "isMock": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DeliveryOrderRejection": {
+        "type": "object",
+        "required": [
+          "reason",
+          "message"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "enum": [
+              "outside-delivery-area",
+              "delivery-distance-too-large",
+              "no-capacity",
+              "scheduled-delivery-not-supported"
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
       "CreateOrderClientErrorResponse": {
         "oneOf": [
           {
@@ -1095,6 +971,230 @@
             "$ref": "#/components/schemas/InvalidClientActionError"
           }
         ]
+      },
+      "DeliveryOrderQuoteRequest": {
+        "type": "object",
+        "required": [
+          "pickUpAddress",
+          "dropOffAddress"
+        ],
+        "properties": {
+          "pickUpAddress": {
+            "$ref": "#/components/schemas/GeocodedAddress"
+          },
+          "dropOffAddress": {
+            "$ref": "#/components/schemas/GeocodedAddress"
+          },
+          "isMock": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DeliveryOrderQuote": {
+        "type": "object",
+        "required": [
+          "uuid",
+          "receivedAt",
+          "goodUntil",
+          "pickUpAddress",
+          "pickUpAfter",
+          "pickUpDeadlineAt",
+          "dropOffAddress",
+          "dropOffAfter",
+          "dropOffDeadlineAt",
+          "deliveryCharges",
+          "isMock"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receivedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "goodUntil": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pickUpAddress": {
+            "$ref": "#/components/schemas/CompleteAddress"
+          },
+          "pickUpAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pickUpDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dropOffAddress": {
+            "$ref": "#/components/schemas/CompleteAddress"
+          },
+          "dropOffAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "dropOffDeadlineAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveryCharges": {
+            "$ref": "#/components/schemas/DeliveryCharges"
+          },
+          "isMock": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RequestQuoteClientErrorResponse": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DeliveryOrderRejection"
+          },
+          {
+            "$ref": "#/components/schemas/InvalidClientActionError"
+          }
+        ]
+      },
+      "Webhook": {
+        "type": "object",
+        "required": [
+          "url",
+          "api_key"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "api_key": {
+            "type": "string"
+          }
+        }
+      },
+      "Webhooks": {
+        "required": [
+          "deliveryJobEvents",
+          "courierEvents"
+        ],
+        "properties": {
+          "deliveryJobEvents": {
+            "$ref": "#/components/schemas/Webhook"
+          },
+          "courierEvents": {
+            "$ref": "#/components/schemas/Webhook"
+          }
+        }
+      },
+      "SetWebhookError": {
+        "type": "object",
+        "required": [
+          "message",
+          "reason"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "invalid-url"
+            ]
+          }
+        }
+      },
+      "DeliveryJobEvent": {
+        "type": "object",
+        "required": [
+          "uuid",
+          "kind",
+          "producedAt",
+          "deliveryJob"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delivery-job-created",
+              "delivery-job-offered-to-courier",
+              "delivery-job-rejected-by-courier",
+              "delivery-job-assigned",
+              "delivery-job-unassigned",
+              "delivery-picked-up",
+              "delivery-completed",
+              "delivery-canceled",
+              "received-new-courier-position",
+              "delivery-job-offered-to-next-courier",
+              "delivery-job-rejected-by-next-courier",
+              "delivery-job-accepted-by-next-courier",
+              "delivery-handed-over",
+              "unassigned-next-courier",
+              "delivery-job-delegated-to-next-courier"
+            ]
+          },
+          "producedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "deliveryJobBefore": {
+            "$ref": "#/components/schemas/DeliveryJob"
+          },
+          "deliveryJob": {
+            "$ref": "#/components/schemas/DeliveryJob"
+          }
+        }
+      },
+      "CourierEvent": {
+        "type": "object",
+        "required": [
+          "uuid",
+          "kind",
+          "producedAt",
+          "courier"
+        ],
+        "properties": {
+          "uuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "courier-received-delivery-offer",
+              "courier-accepted-delivery-offer",
+              "courier-rejected-delivery-offer",
+              "courier-left-for-pick-up",
+              "courier-arrived-at-pick-up",
+              "courier-picked-up-package",
+              "courier-left-for-drop-off",
+              "courier-arrived-at-drop-off",
+              "courier-dropped-off-package",
+              "courier-aborted-delivery",
+              "courier-position-changed",
+              "courier-started-accepting-deliveries",
+              "courier-stopped-accepting-deliveries",
+              "courier-delegated-active-delivery",
+              "courier-prepared-to-hand-over",
+              "courier-handed-over-package"
+            ]
+          },
+          "producedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "courierBefore": {
+            "$ref": "#/components/schemas/Courier"
+          },
+          "courier": {
+            "$ref": "#/components/schemas/Courier"
+          }
+        }
       }
     }
   }

@@ -160,6 +160,13 @@ const (
 	InvalidClientActionErrorReasonDeactivatedClient InvalidClientActionErrorReason = "deactivated-client"
 
 	InvalidClientActionErrorReasonInvalidArgument InvalidClientActionErrorReason = "invalid-argument"
+
+	InvalidClientActionErrorReasonSelfServiceUnavailable InvalidClientActionErrorReason = "self-service-unavailable"
+)
+
+// Defines values for SetWebhookErrorReason.
+const (
+	SetWebhookErrorReasonInvalidUrl SetWebhookErrorReason = "invalid-url"
 )
 
 // AddressDescription defines model for AddressDescription.
@@ -371,6 +378,15 @@ type InvalidClientActionErrorReason string
 // RequestQuoteClientErrorResponse defines model for RequestQuoteClientErrorResponse.
 type RequestQuoteClientErrorResponse interface{}
 
+// SetWebhookError defines model for SetWebhookError.
+type SetWebhookError struct {
+	Message string                `json:"message"`
+	Reason  SetWebhookErrorReason `json:"reason"`
+}
+
+// SetWebhookErrorReason defines model for SetWebhookError.Reason.
+type SetWebhookErrorReason string
+
 // Webhook defines model for Webhook.
 type Webhook struct {
 	ApiKey string `json:"api_key"`
@@ -382,6 +398,9 @@ type Webhooks struct {
 	CourierEvents     Webhook `json:"courierEvents"`
 	DeliveryJobEvents Webhook `json:"deliveryJobEvents"`
 }
+
+// PostJobCancelledJSONBody defines parameters for PostJobCancelled.
+type PostJobCancelledJSONBody interface{}
 
 // CreateOpenRobotLidCommandJSONBody defines parameters for CreateOpenRobotLidCommand.
 type CreateOpenRobotLidCommandJSONBody interface{}
@@ -400,6 +419,9 @@ type RequestQuoteJSONBody DeliveryOrderQuoteRequest
 
 // SetWebhooksJSONBody defines parameters for SetWebhooks.
 type SetWebhooksJSONBody Webhooks
+
+// PostJobCancelledJSONRequestBody defines body for PostJobCancelled for application/json ContentType.
+type PostJobCancelledJSONRequestBody PostJobCancelledJSONBody
 
 // CreateOpenRobotLidCommandJSONRequestBody defines body for CreateOpenRobotLidCommand for application/json ContentType.
 type CreateOpenRobotLidCommandJSONRequestBody CreateOpenRobotLidCommandJSONBody
