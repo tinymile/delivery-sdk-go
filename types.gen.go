@@ -311,8 +311,8 @@ type DeliveryOrderQuote struct {
 	DropOffAddress         CompleteAddress    `json:"dropOffAddress"`
 	DropOffAfter           time.Time          `json:"dropOffAfter"`
 	DropOffDeadlineAt      time.Time          `json:"dropOffDeadlineAt"`
-	EstimatedDropOffWindow *TimeWindow        `json:"estimatedDropOffWindow,omitempty"`
-	EstimatedPickUpWindow  *TimeWindow        `json:"estimatedPickUpWindow,omitempty"`
+	EstimatedDropOffWindow TimeWindow         `json:"estimatedDropOffWindow"`
+	EstimatedPickUpWindow  TimeWindow         `json:"estimatedPickUpWindow"`
 	GoodUntil              time.Time          `json:"goodUntil"`
 	IsMock                 bool               `json:"isMock"`
 	PickUpAddress          CompleteAddress    `json:"pickUpAddress"`
@@ -391,8 +391,8 @@ type SetWebhookErrorReason string
 
 // TimeWindow defines model for TimeWindow.
 type TimeWindow struct {
-	From  *time.Time `json:"from,omitempty"`
-	Until *time.Time `json:"until,omitempty"`
+	From  time.Time `json:"from"`
+	Until time.Time `json:"until"`
 }
 
 // Webhook defines model for Webhook.

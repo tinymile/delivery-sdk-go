@@ -689,6 +689,10 @@
       },
       "TimeWindow": {
         "type": "object",
+        "required": [
+          "from",
+          "until"
+        ],
         "properties": {
           "from": {
             "type": "string",
@@ -1016,7 +1020,9 @@
           "dropOffAfter",
           "dropOffDeadlineAt",
           "deliveryCharges",
-          "isMock"
+          "isMock",
+          "estimatedPickUpWindow",
+          "estimatedDropOffWindow"
         ],
         "properties": {
           "uuid": {
