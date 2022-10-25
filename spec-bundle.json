@@ -687,6 +687,19 @@
           }
         }
       },
+      "TimeWindow": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "until": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "DeliveryJob": {
         "type": "object",
         "required": [
@@ -1045,6 +1058,12 @@
           },
           "isMock": {
             "type": "boolean"
+          },
+          "estimatedPickUpWindow": {
+            "$ref": "#/components/schemas/TimeWindow"
+          },
+          "estimatedDropOffWindow": {
+            "$ref": "#/components/schemas/TimeWindow"
           }
         }
       },
