@@ -510,7 +510,10 @@
     "schemas": {
       "InvalidClientActionError": {
         "type": "object",
-        "required": ["reason", "message"],
+        "required": [
+          "reason",
+          "message"
+        ],
         "properties": {
           "reason": {
             "type": "string",
@@ -527,7 +530,10 @@
       },
       "GeocodedAddress": {
         "type": "object",
-        "required": ["lat", "lng"],
+        "required": [
+          "lat",
+          "lng"
+        ],
         "properties": {
           "lat": {
             "type": "number",
@@ -544,7 +550,10 @@
       },
       "GeocodeLogEntry": {
         "type": "object",
-        "required": ["geocodedAddress", "recordedAt"],
+        "required": [
+          "geocodedAddress",
+          "recordedAt"
+        ],
         "properties": {
           "geocodedAddress": {
             "$ref": "#/components/schemas/GeocodedAddress"
@@ -557,7 +566,9 @@
       },
       "CourierDestination": {
         "type": "object",
-        "required": ["geocodedAddress"],
+        "required": [
+          "geocodedAddress"
+        ],
         "properties": {
           "geocodedAddress": {
             "$ref": "#/components/schemas/GeocodedAddress"
@@ -585,7 +596,10 @@
           },
           "type": {
             "type": "string",
-            "enum": ["robot", "conventional"]
+            "enum": [
+              "robot",
+              "conventional"
+            ]
           },
           "name": {
             "type": "string"
@@ -654,7 +668,10 @@
       },
       "CompleteAddress": {
         "type": "object",
-        "required": ["geocodedAddress", "addressDescription"],
+        "required": [
+          "geocodedAddress",
+          "addressDescription"
+        ],
         "properties": {
           "geocodedAddress": {
             "$ref": "#/components/schemas/GeocodedAddress"
@@ -666,7 +683,9 @@
       },
       "DeliveryCharges": {
         "type": "object",
-        "required": ["totalInCents"],
+        "required": [
+          "totalInCents"
+        ],
         "properties": {
           "totalInCents": {
             "type": "integer",
@@ -739,13 +758,21 @@
           },
           "packageHolder": {
             "type": "string",
-            "enum": ["shipper", "receiver", "courier", "unknown"]
+            "enum": [
+              "shipper",
+              "receiver",
+              "courier",
+              "unknown"
+            ]
           }
         }
       },
       "DeliveryOrderParty": {
         "type": "object",
-        "required": ["name", "isBusiness"],
+        "required": [
+          "name",
+          "isBusiness"
+        ],
         "properties": {
           "name": {
             "type": "string"
@@ -922,7 +949,10 @@
       },
       "DeliveryOrderRejection": {
         "type": "object",
-        "required": ["reason", "message"],
+        "required": [
+          "reason",
+          "message"
+        ],
         "properties": {
           "reason": {
             "type": "string",
@@ -950,7 +980,10 @@
       },
       "DeliveryOrderQuoteRequest": {
         "type": "object",
-        "required": ["pickUpAddress", "dropOffAddress"],
+        "required": [
+          "pickUpAddress",
+          "dropOffAddress"
+        ],
         "properties": {
           "pickUpAddress": {
             "$ref": "#/components/schemas/GeocodedAddress"
@@ -960,6 +993,23 @@
           },
           "isMock": {
             "type": "boolean"
+          }
+        }
+      },
+      "TimeWindow": {
+        "type": "object",
+        "required": [
+          "from",
+          "until"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "until": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -976,7 +1026,9 @@
           "dropOffAfter",
           "dropOffDeadlineAt",
           "deliveryCharges",
-          "isMock"
+          "isMock",
+          "estimatedPickUpWindow",
+          "estimatedDropOffWindow"
         ],
         "properties": {
           "uuid": {
@@ -1018,6 +1070,12 @@
           },
           "isMock": {
             "type": "boolean"
+          },
+          "estimatedPickUpWindow": {
+            "$ref": "#/components/schemas/TimeWindow"
+          },
+          "estimatedDropOffWindow": {
+            "$ref": "#/components/schemas/TimeWindow"
           }
         }
       },
@@ -1033,7 +1091,10 @@
       },
       "Webhook": {
         "type": "object",
-        "required": ["url", "api_key"],
+        "required": [
+          "url",
+          "api_key"
+        ],
         "properties": {
           "url": {
             "type": "string"
@@ -1044,7 +1105,10 @@
         }
       },
       "Webhooks": {
-        "required": ["deliveryJobEvents", "courierEvents"],
+        "required": [
+          "deliveryJobEvents",
+          "courierEvents"
+        ],
         "properties": {
           "deliveryJobEvents": {
             "$ref": "#/components/schemas/Webhook"
@@ -1056,20 +1120,30 @@
       },
       "SetWebhookError": {
         "type": "object",
-        "required": ["message", "reason"],
+        "required": [
+          "message",
+          "reason"
+        ],
         "properties": {
           "message": {
             "type": "string"
           },
           "reason": {
             "type": "string",
-            "enum": ["invalid-url"]
+            "enum": [
+              "invalid-url"
+            ]
           }
         }
       },
       "DeliveryJobEvent": {
         "type": "object",
-        "required": ["uuid", "kind", "producedAt", "deliveryJob"],
+        "required": [
+          "uuid",
+          "kind",
+          "producedAt",
+          "deliveryJob"
+        ],
         "properties": {
           "uuid": {
             "type": "string",
@@ -1109,7 +1183,12 @@
       },
       "CourierEvent": {
         "type": "object",
-        "required": ["uuid", "kind", "producedAt", "courier"],
+        "required": [
+          "uuid",
+          "kind",
+          "producedAt",
+          "courier"
+        ],
         "properties": {
           "uuid": {
             "type": "string",
