@@ -336,6 +336,9 @@
           },
           "409": {
             "description": "An order with the same ID already exists"
+          },
+          "429": {
+            "description": "Too many requests"
           }
         }
       }
@@ -401,6 +404,9 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Too many requests"
           }
         }
       }
@@ -990,6 +996,23 @@
           }
         }
       },
+      "TimeWindow": {
+        "type": "object",
+        "required": [
+          "from",
+          "until"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "until": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "DeliveryOrderQuote": {
         "type": "object",
         "required": [
@@ -1003,7 +1026,9 @@
           "dropOffAfter",
           "dropOffDeadlineAt",
           "deliveryCharges",
-          "isMock"
+          "isMock",
+          "estimatedPickUpWindow",
+          "estimatedDropOffWindow"
         ],
         "properties": {
           "uuid": {
@@ -1045,6 +1070,12 @@
           },
           "isMock": {
             "type": "boolean"
+          },
+          "estimatedPickUpWindow": {
+            "$ref": "#/components/schemas/TimeWindow"
+          },
+          "estimatedDropOffWindow": {
+            "$ref": "#/components/schemas/TimeWindow"
           }
         }
       },

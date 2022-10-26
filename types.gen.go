@@ -307,17 +307,19 @@ type DeliveryOrderParty struct {
 
 // DeliveryOrderQuote defines model for DeliveryOrderQuote.
 type DeliveryOrderQuote struct {
-	DeliveryCharges   DeliveryCharges    `json:"deliveryCharges"`
-	DropOffAddress    CompleteAddress    `json:"dropOffAddress"`
-	DropOffAfter      time.Time          `json:"dropOffAfter"`
-	DropOffDeadlineAt time.Time          `json:"dropOffDeadlineAt"`
-	GoodUntil         time.Time          `json:"goodUntil"`
-	IsMock            bool               `json:"isMock"`
-	PickUpAddress     CompleteAddress    `json:"pickUpAddress"`
-	PickUpAfter       time.Time          `json:"pickUpAfter"`
-	PickUpDeadlineAt  time.Time          `json:"pickUpDeadlineAt"`
-	ReceivedAt        time.Time          `json:"receivedAt"`
-	Uuid              openapi_types.UUID `json:"uuid"`
+	DeliveryCharges        DeliveryCharges    `json:"deliveryCharges"`
+	DropOffAddress         CompleteAddress    `json:"dropOffAddress"`
+	DropOffAfter           time.Time          `json:"dropOffAfter"`
+	DropOffDeadlineAt      time.Time          `json:"dropOffDeadlineAt"`
+	EstimatedDropOffWindow TimeWindow         `json:"estimatedDropOffWindow"`
+	EstimatedPickUpWindow  TimeWindow         `json:"estimatedPickUpWindow"`
+	GoodUntil              time.Time          `json:"goodUntil"`
+	IsMock                 bool               `json:"isMock"`
+	PickUpAddress          CompleteAddress    `json:"pickUpAddress"`
+	PickUpAfter            time.Time          `json:"pickUpAfter"`
+	PickUpDeadlineAt       time.Time          `json:"pickUpDeadlineAt"`
+	ReceivedAt             time.Time          `json:"receivedAt"`
+	Uuid                   openapi_types.UUID `json:"uuid"`
 }
 
 // DeliveryOrderQuoteRequest defines model for DeliveryOrderQuoteRequest.
@@ -386,6 +388,12 @@ type SetWebhookError struct {
 
 // SetWebhookErrorReason defines model for SetWebhookError.Reason.
 type SetWebhookErrorReason string
+
+// TimeWindow defines model for TimeWindow.
+type TimeWindow struct {
+	From  time.Time `json:"from"`
+	Until time.Time `json:"until"`
+}
 
 // Webhook defines model for Webhook.
 type Webhook struct {
