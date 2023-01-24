@@ -148,9 +148,13 @@ const (
 const (
 	DeliveryOrderRejectionReasonDeliveryDistanceTooLarge DeliveryOrderRejectionReason = "delivery-distance-too-large"
 
+	DeliveryOrderRejectionReasonDropOffOutsideDeliveryArea DeliveryOrderRejectionReason = "drop-off-outside-delivery-area"
+
 	DeliveryOrderRejectionReasonNoCapacity DeliveryOrderRejectionReason = "no-capacity"
 
 	DeliveryOrderRejectionReasonOutsideDeliveryArea DeliveryOrderRejectionReason = "outside-delivery-area"
+
+	DeliveryOrderRejectionReasonPickUpOutsideDeliveryArea DeliveryOrderRejectionReason = "pick-up-outside-delivery-area"
 
 	DeliveryOrderRejectionReasonScheduledDeliveryNotSupported DeliveryOrderRejectionReason = "scheduled-delivery-not-supported"
 )

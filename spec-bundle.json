@@ -958,6 +958,8 @@
             "type": "string",
             "enum": [
               "outside-delivery-area",
+              "pick-up-outside-delivery-area",
+              "drop-off-outside-delivery-area",
               "delivery-distance-too-large",
               "no-capacity",
               "scheduled-delivery-not-supported"
