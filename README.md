@@ -8,11 +8,17 @@ For the full documentation of the API, please see https://external-api.prod.gcp.
 
 For the development version, see https://external-api.dev.gcp.tinymile.ai/doc . This is the version this repository is synchronized with.
 
+# Basic usage
+
+```go
+delivery_sdk.NewClientWithResponses(
+        "https://external-api.prod.gcp.tinymile.ai",
+		delivery_sdk.WithAPIKeyAuthentication(apiKey))
+```
+
 # API Compatibility
 
 The API is versioned, so this SDK is guaranteed to have [forward compatibility](https://en.wikipedia.org/wiki/Forward_compatibility) with the API.
-
-# Contributing
 
 ## Build
 
