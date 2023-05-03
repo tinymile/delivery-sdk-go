@@ -10,14 +10,10 @@ For the development version, see https://external-api.dev.gcp.tinymile.ai/doc . 
 
 # API Compatibility
 
-The API is in alpha stage, so breaking changes are expected. Once it matures forwards and backwards compatibility will be enforced.
+The API is versioned, so this SDK is guaranteed to have [forward compatibility](https://en.wikipedia.org/wiki/Forward_compatibility) with the API.
 
 # Contributing
 
 ## Build
 
 Clone this repo and run `make all` to build it.
-
-# We are hiring!
-
-Like what you see and wish to work with us? Check our positions at https://tiny-mile.breezy.hr . We're always looking for good engineers to help us put more robots on the streets!

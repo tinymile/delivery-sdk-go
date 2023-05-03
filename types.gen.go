@@ -294,6 +294,7 @@ type DeliveryOrderCreationRequest struct {
 	ExternalID         string                      `json:"externalID"`
 	IsMock             *bool                       `json:"isMock,omitempty"`
 	PickUpAddress      CompleteAddress             `json:"pickUpAddress"`
+	PickUpAfter        *time.Time                  `json:"pickUpAfter,omitempty"`
 	PickUpDeadlineAt   *time.Time                  `json:"pickUpDeadlineAt,omitempty"`
 	PickUpNotes        *string                     `json:"pickUpNotes,omitempty"`
 	PickUpNotifyParty  *DeliveryServiceNotifyParty `json:"pickUpNotifyParty,omitempty"`
